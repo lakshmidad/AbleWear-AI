@@ -2,15 +2,16 @@ import React, { useState } from 'react'
 import Navbar from './components/Navbar'
 import ProfileBuilder from './components/ProfileBuilder'
 import GarmentScanner from './components/GarmentScanner'
+import AdaptiveCatalog from './components/AdaptiveCatalog'
 import Footer from './components/Footer'
 import { Sliders, Sparkles, ShoppingBag, Scissors, ArrowRight, Scan } from 'lucide-react'
 
 export default function App() {
   const [highContrast, setHighContrast] = useState(false)
   const [largeText, setLargeText] = useState(false)
-  const [currentStep, setCurrentStep] = useState(2) // Default to 2 so user directly sees Feature 2 output!
+  const [currentStep, setCurrentStep] = useState(3) // Default to Step 3 so user directly sees Feature 3 output!
 
-  // Centralized Accessibility Profile State (Feature 1 -> Feature 2)
+  // Centralized Accessibility Profile State (Feature 1 -> Feature 2 & 3)
   const [profile, setProfile] = useState({
     mobility: 'Wheelchair/Seated',
     dexterity: ['Fine motor difficulty', 'Limited hand strength'],
@@ -36,9 +37,9 @@ export default function App() {
     { 
       id: 3, 
       name: 'Adaptive Catalog', 
-      available: false, 
+      available: true, 
       icon: ShoppingBag, 
-      desc: 'Coming in Step 3' 
+      desc: '6 Items with Functional Filters' 
     },
     { 
       id: 4, 
@@ -131,7 +132,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* Dynamic View: Step 1 vs Step 2 */}
+        {/* Dynamic Views */}
         {currentStep === 1 && (
           <ProfileBuilder 
             profile={profile}
@@ -148,6 +149,15 @@ export default function App() {
             highContrast={highContrast}
             largeText={largeText}
             onNavigateToProfile={() => setCurrentStep(1)}
+          />
+        )}
+
+        {currentStep === 3 && (
+          <AdaptiveCatalog 
+            userProfile={profile}
+            highContrast={highContrast}
+            largeText={largeText}
+            onNavigateToScanner={() => setCurrentStep(2)}
           />
         )}
 
