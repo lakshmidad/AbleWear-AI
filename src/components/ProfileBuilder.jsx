@@ -16,19 +16,17 @@ import {
   Activity,
   HeartPulse,
   Info,
-  ChevronRight,
+  ArrowRight,
   ShieldCheck
 } from 'lucide-react'
 
-export default function ProfileBuilder({ highContrast, largeText }) {
-  // Profile State
-  const [profile, setProfile] = useState({
-    mobility: 'Wheelchair/Seated', // Wheelchair/Seated, Crutches, Bed-bound
-    dexterity: ['Fine motor difficulty'], // Fine motor difficulty, Limited hand strength
-    fasteners: ['Magnetic snaps', 'Side zippers'], // Magnetic snaps, Side zippers, Velcro, Elastic waist
-    sensory: ['Tagless', 'Flat seams'] // Tagless, Flat seams
-  })
-
+export default function ProfileBuilder({ 
+  profile, 
+  setProfile, 
+  highContrast, 
+  largeText,
+  onProceedToScanner
+}) {
   // Visual Confirmation State
   const [lastUpdatedField, setLastUpdatedField] = useState(null)
   const [savedSuccess, setSavedSuccess] = useState(false)
@@ -577,7 +575,7 @@ export default function ProfileBuilder({ highContrast, largeText }) {
             </div>
           </section>
 
-          {/* Action Trigger / Save Profile */}
+          {/* Action Trigger / Save Profile & Continue */}
           <div className="pt-4 flex flex-col sm:flex-row items-center gap-4">
             <button
               onClick={handleSaveProfile}
@@ -591,9 +589,21 @@ export default function ProfileBuilder({ highContrast, largeText }) {
               <Save className="w-5 h-5" />
               Save & Lock In Accessibility Profile
             </button>
-            <span className={`text-xs ${highContrast ? 'text-zinc-400' : 'text-slate-500'} flex items-center gap-1.5`}>
-              <Info className="w-4 h-4" /> Changes update live in React state
-            </span>
+
+            {onProceedToScanner && (
+              <button
+                type="button"
+                onClick={onProceedToScanner}
+                className={`w-full sm:w-auto px-6 py-4 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all border ${
+                  highContrast
+                    ? 'border-yellow-400 text-yellow-300 hover:bg-yellow-400/20'
+                    : 'border-slate-300 bg-white hover:bg-slate-100 text-slate-800 shadow-sm'
+                }`}
+              >
+                <span>Proceed to AI Garment Scanner</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            )}
           </div>
 
         </div>
@@ -754,18 +764,22 @@ export default function ProfileBuilder({ highContrast, largeText }) {
               </div>
             </div>
 
-            {/* AI Recommendation Engine Note */}
-            <div className={`mt-6 pt-5 border-t text-xs ${
-              highContrast ? 'border-zinc-800 text-zinc-300' : 'border-slate-100 text-slate-500'
-            }`}>
-              <div className="flex items-center gap-1.5 font-bold mb-1 text-sky-600">
-                <Sparkles className="w-3.5 h-3.5" /> Next Steps in Flow:
+            {/* Quick Action to Scanner */}
+            {onProceedToScanner && (
+              <div className="mt-6 pt-5 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={onProceedToScanner}
+                  className={`w-full py-3 rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
+                    highContrast 
+                      ? 'bg-yellow-400 text-black hover:bg-yellow-300' 
+                      : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20'
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4" /> Scan Garments With This Profile
+                </button>
               </div>
-              <p className="leading-relaxed">
-                These settings directly inform the <strong>AI Garment Scanner</strong> (Step 2) and 
-                <strong> Accessible Catalog Filters</strong> (Step 3).
-              </p>
-            </div>
+            )}
 
           </div>
 
