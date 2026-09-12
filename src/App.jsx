@@ -3,15 +3,17 @@ import Navbar from './components/Navbar'
 import ProfileBuilder from './components/ProfileBuilder'
 import GarmentScanner from './components/GarmentScanner'
 import AdaptiveCatalog from './components/AdaptiveCatalog'
+import CustomizationPortal from './components/CustomizationPortal'
 import Footer from './components/Footer'
 import { Sliders, Sparkles, ShoppingBag, Scissors, ArrowRight, Scan } from 'lucide-react'
 
 export default function App() {
   const [highContrast, setHighContrast] = useState(false)
   const [largeText, setLargeText] = useState(false)
-  const [currentStep, setCurrentStep] = useState(3) // Default to Step 3 so user directly sees Feature 3 output!
+  const [currentStep, setCurrentStep] = useState(4) // Default to Step 4 so user directly sees Feature 4 output!
+  const [preselectedGarment, setPreselectedGarment] = useState(null)
 
-  // Centralized Accessibility Profile State (Feature 1 -> Feature 2 & 3)
+  // Centralized Accessibility Profile State across all 4 Features
   const [profile, setProfile] = useState({
     mobility: 'Wheelchair/Seated',
     dexterity: ['Fine motor difficulty', 'Limited hand strength'],
@@ -43,19 +45,24 @@ export default function App() {
     },
     { 
       id: 4, 
-      name: 'Tailor Request', 
-      available: false, 
+      name: 'Tailor Customization', 
+      available: true, 
       icon: Scissors, 
-      desc: 'Coming in Step 4' 
+      desc: 'Alteration Portal & Community' 
     }
   ]
+
+  const handleNavigateToCustomization = (garment) => {
+    setPreselectedGarment(garment)
+    setCurrentStep(4)
+  }
 
   return (
     <div className={`min-h-screen flex flex-col transition-colors duration-200 ${
       highContrast ? 'high-contrast bg-black text-white' : 'bg-slate-50 text-slate-900'
     } ${largeText ? 'text-lg' : 'text-base'}`}>
       
-      {/* Accessible Navbar */}
+      {/* Accessible High-Contrast Navbar */}
       <Navbar 
         highContrast={highContrast} 
         setHighContrast={setHighContrast}
@@ -66,9 +73,9 @@ export default function App() {
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         
-        {/* Prototype Interactive Stepper */}
+        {/* Prototype Stepper with Instant Switching across all 4 Main Screens */}
         <div className="mb-8 overflow-x-auto pb-2">
-          <div className="flex items-center min-w-[640px] justify-between gap-3">
+          <div className="flex items-center min-w-[700px] justify-between gap-3">
             {steps.map((step, idx) => {
               const IconComp = step.icon
               const isCurrent = currentStep === step.id
@@ -132,7 +139,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* Dynamic Views */}
+        {/* Screen 1: Accessibility Profile Builder */}
         {currentStep === 1 && (
           <ProfileBuilder 
             profile={profile}
@@ -143,6 +150,7 @@ export default function App() {
           />
         )}
 
+        {/* Screen 2: AI Garment Scanner & Analyzer */}
         {currentStep === 2 && (
           <GarmentScanner 
             userProfile={profile}
@@ -152,18 +160,31 @@ export default function App() {
           />
         )}
 
+        {/* Screen 3: Adaptive Clothing Catalog & Search Filters */}
         {currentStep === 3 && (
           <AdaptiveCatalog 
             userProfile={profile}
             highContrast={highContrast}
             largeText={largeText}
             onNavigateToScanner={() => setCurrentStep(2)}
+            onNavigateToCustomization={handleNavigateToCustomization}
+          />
+        )}
+
+        {/* Screen 4: Garment Customization Portal & Community Ratings */}
+        {currentStep === 4 && (
+          <CustomizationPortal 
+            userProfile={profile}
+            highContrast={highContrast}
+            largeText={largeText}
+            preselectedGarment={preselectedGarment}
+            onNavigateToCatalog={() => setCurrentStep(3)}
           />
         )}
 
       </main>
 
-      {/* Accessible Footer */}
+      {/* Visible Footer on All Pages (Prompt Requirement) */}
       <Footer highContrast={highContrast} />
 
     </div>
