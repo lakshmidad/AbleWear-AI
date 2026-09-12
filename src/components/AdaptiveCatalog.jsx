@@ -123,7 +123,13 @@ const CATALOG_ITEMS = [
   }
 ]
 
-export default function AdaptiveCatalog({ userProfile, highContrast, largeText, onNavigateToScanner }) {
+export default function AdaptiveCatalog({ 
+  userProfile, 
+  highContrast, 
+  largeText, 
+  onNavigateToScanner,
+  onNavigateToCustomization
+}) {
   // State
   const [selectedFilter, setSelectedFilter] = useState('All Items')
   const [searchQuery, setSearchQuery] = useState('')
@@ -382,32 +388,46 @@ export default function AdaptiveCatalog({ userProfile, highContrast, largeText, 
               <div className={`p-6 pt-0 border-t mt-4 ${
                 highContrast ? 'border-zinc-800' : 'border-slate-100'
               }`}>
-                <div className="pt-4 flex items-center justify-between gap-3">
+                <div className="pt-4 flex flex-wrap items-center justify-between gap-2">
                   <button
                     type="button"
                     onClick={() => setActiveModalItem(item)}
-                    className={`flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
+                    className={`flex-1 min-w-[100px] py-2 rounded-lg font-bold text-xs flex items-center justify-center gap-1 transition-all ${
                       highContrast
                         ? 'bg-zinc-900 text-yellow-400 border border-yellow-400 hover:bg-yellow-400 hover:text-black'
                         : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200'
                     }`}
                   >
                     <Eye className="w-3.5 h-3.5" />
-                    <span>View All Specs</span>
+                    <span>Specs</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={onNavigateToScanner}
-                    className={`px-3.5 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
+                    className={`px-3 py-2 rounded-lg font-bold text-xs flex items-center justify-center gap-1 transition-all ${
                       highContrast
-                        ? 'bg-yellow-400 text-black hover:bg-yellow-300'
-                        : 'bg-sky-600 hover:bg-sky-500 text-white shadow-md shadow-sky-600/20'
+                        ? 'bg-zinc-800 text-white border border-zinc-700'
+                        : 'bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100'
                     }`}
                     title="Send item into AI Scanner to verify fit"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
-                    <span>Scan Fit</span>
+                    <span>Scan</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => onNavigateToCustomization && onNavigateToCustomization(item)}
+                    className={`flex-1 min-w-[120px] py-2 rounded-lg font-bold text-xs flex items-center justify-center gap-1 transition-all ${
+                      highContrast
+                        ? 'bg-yellow-400 text-black hover:bg-yellow-300'
+                        : 'bg-slate-900 hover:bg-slate-800 text-white shadow-sm'
+                    }`}
+                    title="Request custom adaptive modifications by certified tailors"
+                  >
+                    <Scissors className="w-3.5 h-3.5" />
+                    <span>Alterations</span>
                   </button>
                 </div>
               </div>
