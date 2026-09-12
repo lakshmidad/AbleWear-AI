@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-heading: 'Outfit', sans-serif;
+    --font-body: 'Plus Jakarta Sans', sans-serif;
+  }
+  
+  body {
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+}
+
+/* High Contrast Mode Utility Overrides */
+.high-contrast {
+  --tw-bg-opacity: 1;
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.high-contrast .hc-card {
+  background-color: #0c0d0e !important;
+  border-color: #fbbf24 !important;
+  color: #ffffff !important;
+}
+
+.high-contrast .hc-card-active {
+  background-color: #1e1e1e !important;
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 0 3px #38bdf8 !important;
+}
+
+.high-contrast .hc-text-primary {
+  color: #fef08a !important;
+}
+
+.high-contrast .hc-badge {
+  background-color: #0284c7 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+}
+
+/* High touch target & accessible focus rings */
+button:focus-visible, input:focus-visible, a:focus-visible {
+  outline: 3px solid #2563eb !important;
+  outline-offset: 3px !important;
+}
+
+/* Smooth transitions */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
