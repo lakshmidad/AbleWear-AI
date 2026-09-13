@@ -42,7 +42,7 @@ export function AccessibilityProvider({ children }) {
     {
       orderId: 'ADAPT-849201',
       date: 'Sep 13, 2026',
-      status: 'In Sewing',
+      status: 'In Alteration',
       trackingStep: 3,
       totalFee: 63.00,
       turnaround: '48-hour delivery',
@@ -50,12 +50,48 @@ export function AccessibilityProvider({ children }) {
       selectedGarment: CATALOG_ITEMS[0],
       alterations: [AVAILABLE_ALTERATIONS[0], AVAILABLE_ALTERATIONS[2]],
       notes: 'Concealed magnetic closures on front placket; smooth neckline seam tape.'
+    },
+    {
+      orderId: 'ADAPT-910452',
+      date: 'Sep 12, 2026',
+      status: 'Out for Delivery',
+      trackingStep: 5,
+      totalFee: 70.00,
+      turnaround: 'Express 24-hr',
+      assignedTailor: LOCAL_TAILORS[2] || LOCAL_TAILORS[0],
+      selectedGarment: CATALOG_ITEMS[1] || CATALOG_ITEMS[0],
+      alterations: [AVAILABLE_ALTERATIONS[1], AVAILABLE_ALTERATIONS[3] || AVAILABLE_ALTERATIONS[0]],
+      notes: 'Full length side-seam zippers with ring pulls for seated dressing.'
+    },
+    {
+      orderId: 'ADAPT-638204',
+      date: 'Sep 11, 2026',
+      status: 'Tailor Accepted',
+      trackingStep: 2,
+      totalFee: 42.00,
+      turnaround: '36-hour delivery',
+      assignedTailor: LOCAL_TAILORS[1] || LOCAL_TAILORS[0],
+      selectedGarment: CATALOG_ITEMS[2] || CATALOG_ITEMS[0],
+      alterations: [AVAILABLE_ALTERATIONS[2]],
+      notes: 'Tagless conversion & flat-felled seam binding for hyper-sensitive skin.'
+    },
+    {
+      orderId: 'ADAPT-421908',
+      date: 'Sep 05, 2026',
+      status: 'Delivered',
+      trackingStep: 5,
+      totalFee: 68.00,
+      turnaround: 'Completed & Delivered',
+      assignedTailor: LOCAL_TAILORS[0],
+      selectedGarment: CATALOG_ITEMS[3] || CATALOG_ITEMS[0],
+      alterations: [AVAILABLE_ALTERATIONS[0], AVAILABLE_ALTERATIONS[1]],
+      notes: 'Magnetic snaps installed on cuffs and front closure.'
     }
   ])
   const [orderStatus, setOrderStatus] = useState({
     orderId: 'ADAPT-849201',
     date: 'Sep 13, 2026',
-    status: 'In Sewing',
+    status: 'In Alteration',
     trackingStep: 3,
     totalFee: 63.00,
     turnaround: '48-hour delivery',
@@ -203,10 +239,11 @@ export function AccessibilityProvider({ children }) {
       return
     }
 
-    // "Track my orders" / "Track orders"
-    if (text.includes('track my orders') || text.includes('track order') || text.includes('tracking')) {
-      setIsTrackingOpen(true)
-      const msg = 'Opening active order tracking.'
+    // "Track my orders" / "Track orders" / "My orders"
+    if (text.includes('track my orders') || text.includes('track order') || text.includes('tracking') || text.includes('my orders')) {
+      setCurrentStep(5)
+      setIsTrackingOpen(false)
+      const msg = 'Opening Flipkart-Style My Orders and Live Order Tracker.'
       setVoiceFeedback(msg)
       speak(msg)
       return
@@ -408,7 +445,7 @@ export function AccessibilityProvider({ children }) {
     const newOrder = {
       orderId,
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      status: 'Request Sent',
+      status: 'Order Placed',
       trackingStep: 1,
       totalFee: summary.totalCost,
       turnaround: `${summary.turnaroundHours}-hour delivery`,

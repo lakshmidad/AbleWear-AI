@@ -7,12 +7,13 @@ import ProfileBuilder from './components/ProfileBuilder'
 import GarmentScanner from './components/GarmentScanner'
 import AdaptiveCatalog from './components/AdaptiveCatalog'
 import CustomizationPortal from './components/CustomizationPortal'
+import MyOrdersPage from './components/MyOrdersPage'
 import OrderTrackingModal from './components/OrderTrackingModal'
 import VoiceAssistantOverlay from './components/VoiceAssistantOverlay'
 import Footer from './components/Footer'
 
 function MainContent() {
-  const { currentStep, highContrast, fontSize, setIsTrackingOpen } = useAccessibility()
+  const { currentStep, setCurrentStep, highContrast, fontSize, setIsTrackingOpen } = useAccessibility()
 
   // Font Size class mapping
   const fontSizeClass = fontSize === 'xlarge' 
@@ -48,7 +49,7 @@ function MainContent() {
               animate="animate"
               exit="exit"
             >
-              <LandingPage onTrackOrders={() => setIsTrackingOpen(true)} />
+              <LandingPage onTrackOrders={() => setCurrentStep(5)} />
             </motion.div>
           )}
 
@@ -101,6 +102,19 @@ function MainContent() {
               exit="exit"
             >
               <CustomizationPortal />
+            </motion.div>
+          )}
+
+          {/* Step 5: Flipkart-Style My Orders & Live Order Tracker */}
+          {currentStep === 5 && (
+            <motion.div
+              key="step-5"
+              variants={stepVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+            >
+              <MyOrdersPage />
             </motion.div>
           )}
         </AnimatePresence>
