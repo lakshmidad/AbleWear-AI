@@ -129,6 +129,7 @@ export default function AdaptiveCatalog({
   largeText, 
   onNavigateToScanner,
   onNavigateToCustomization,
+  onNavigateToSimulator,
   activeFilter,
   onFilterChange
 }) {
@@ -512,20 +513,34 @@ export default function AdaptiveCatalog({
               ))}
             </div>
 
-            <div className="mt-6 pt-4 border-t border-slate-200 flex items-center justify-between">
+            <div className="mt-6 pt-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
               <span className="font-mono text-xl font-black">{activeModalItem.price}</span>
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveModalItem(null)
-                  if (onNavigateToScanner) onNavigateToScanner()
-                }}
-                className={`px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 ${
-                  highContrast ? 'bg-yellow-400 text-black' : 'bg-sky-600 text-white hover:bg-sky-500'
-                }`}
-              >
-                <Sparkles className="w-4 h-4" /> Run AI Garment Scan
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveModalItem(null)
+                    if (onNavigateToSimulator) onNavigateToSimulator()
+                  }}
+                  className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all ${
+                    highContrast ? 'bg-zinc-800 text-yellow-300 border border-yellow-400' : 'bg-slate-900 text-white hover:bg-slate-800'
+                  }`}
+                >
+                  <Activity className="w-4 h-4" /> 3D Fit Simulator
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveModalItem(null)
+                    if (onNavigateToScanner) onNavigateToScanner()
+                  }}
+                  className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-1.5 ${
+                    highContrast ? 'bg-yellow-400 text-black' : 'bg-sky-600 text-white hover:bg-sky-500'
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4" /> Run AI Scan
+                </button>
+              </div>
             </div>
           </div>
         </div>

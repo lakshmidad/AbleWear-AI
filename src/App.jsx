@@ -4,14 +4,15 @@ import ProfileBuilder from './components/ProfileBuilder'
 import GarmentScanner from './components/GarmentScanner'
 import AdaptiveCatalog from './components/AdaptiveCatalog'
 import CustomizationPortal from './components/CustomizationPortal'
+import FitSimulator from './components/FitSimulator'
 import VoiceAssistantOverlay from './components/VoiceAssistantOverlay'
 import Footer from './components/Footer'
-import { Sliders, Sparkles, ShoppingBag, Scissors, ArrowRight, Scan } from 'lucide-react'
+import { Sliders, Sparkles, ShoppingBag, Scissors, ArrowRight, Scan, Activity } from 'lucide-react'
 
 export default function App() {
   const [highContrast, setHighContrast] = useState(false)
   const [largeText, setLargeText] = useState(false)
-  const [currentStep, setCurrentStep] = useState(1) // Default start at Step 1 or user-selected
+  const [currentStep, setCurrentStep] = useState(5) // Default to Step 5 so user directly sees Feature 6 output!
   const [preselectedGarment, setPreselectedGarment] = useState(null)
   const [catalogFilter, setCatalogFilter] = useState('All Items')
 
@@ -58,6 +59,13 @@ export default function App() {
       available: true, 
       icon: Scissors, 
       desc: 'Alteration Portal & Community' 
+    },
+    { 
+      id: 5, 
+      name: '3D Fit Simulator', 
+      available: true, 
+      icon: Activity, 
+      desc: 'Seated vs Standing Posture' 
     }
   ]
 
@@ -142,6 +150,20 @@ export default function App() {
       return
     }
 
+    // 5. "Fit Simulator" / "Seated Simulator"
+    if (
+      text.includes('fit simulator') || 
+      text.includes('seated simulator') || 
+      text.includes('posture simulator') || 
+      text.includes('posture') ||
+      text.includes('seated fit')
+    ) {
+      setCurrentStep(5)
+      setVoiceFeedbackMessage('Opened 3D Posture Fit Simulator.')
+      speak('Opening 3D seated versus standing body posture simulator.')
+      return
+    }
+
     // Helper: "Go to Profile"
     if (text.includes('profile') || text.includes('accessibility profile') || text.includes('step 1')) {
       setCurrentStep(1)
@@ -199,13 +221,10 @@ export default function App() {
       }
 
       recognition.onend = () => {
-        // Automatically restart if user still has listening toggled on
         if (isVoiceListening) {
           try {
             recognition.start()
-          } catch (e) {
-            // Already running
-          }
+          } catch (e) {}
         }
       }
 
@@ -271,7 +290,7 @@ export default function App() {
         
         {/* Prototype Stepper with Instant Switching across all Main Screens */}
         <div className="mb-8 overflow-x-auto pb-2">
-          <div className="flex items-center min-w-[700px] justify-between gap-3">
+          <div className="flex items-center min-w-[850px] justify-between gap-3">
             {steps.map((step, idx) => {
               const IconComp = step.icon
               const isCurrent = currentStep === step.id
@@ -364,6 +383,7 @@ export default function App() {
             largeText={largeText}
             onNavigateToScanner={() => setCurrentStep(2)}
             onNavigateToCustomization={handleNavigateToCustomization}
+            onNavigateToSimulator={() => setCurrentStep(5)}
             activeFilter={catalogFilter}
             onFilterChange={setCatalogFilter}
           />
@@ -377,6 +397,16 @@ export default function App() {
             largeText={largeText}
             preselectedGarment={preselectedGarment}
             onNavigateToCatalog={() => setCurrentStep(3)}
+          />
+        )}
+
+        {/* Screen 5: 3D Seated vs. Standing Body Posture Simulator */}
+        {currentStep === 5 && (
+          <FitSimulator 
+            userProfile={profile}
+            highContrast={highContrast}
+            largeText={largeText}
+            onNavigateToCustomization={handleNavigateToCustomization}
           />
         )}
 
