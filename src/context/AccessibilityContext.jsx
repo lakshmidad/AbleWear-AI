@@ -305,6 +305,51 @@ export function AccessibilityProvider({ children }) {
       return
     }
 
+    // "Matched Catalog" / "Catalog" / "Browse"
+    if (text.includes('catalog') || text.includes('matched') || text.includes('shop') || text.includes('browse')) {
+      setCurrentStep(3)
+      const msg = 'Opening Personalized Matched Adaptive Catalog and 3D Fit Simulator.'
+      setVoiceFeedback(msg)
+      speak(msg)
+      return
+    }
+
+    // "Profile" / "Accessibility Profile"
+    if (text.includes('profile') || text.includes('mobility needs')) {
+      setCurrentStep(1)
+      const msg = 'Opening Step 1: Accessibility Profile Builder.'
+      setVoiceFeedback(msg)
+      speak(msg)
+      return
+    }
+
+    // "Customization" / "Tailor"
+    if (text.includes('customization') || text.includes('tailor') || text.includes('alteration')) {
+      setCurrentStep(4)
+      const msg = 'Opening Step 4: Customization & Local Tailor Dispatch.'
+      setVoiceFeedback(msg)
+      speak(msg)
+      return
+    }
+
+    // "Larger font" / "Increase font"
+    if (text.includes('larger font') || text.includes('increase font') || text.includes('big font')) {
+      setFontSize('xlarge')
+      const msg = 'Font size scaled to extra large.'
+      setVoiceFeedback(msg)
+      speak(msg)
+      return
+    }
+
+    // "Normal font" / "Reset font"
+    if (text.includes('normal font') || text.includes('default font') || text.includes('reset font')) {
+      setFontSize('normal')
+      const msg = 'Font size restored to standard size.'
+      setVoiceFeedback(msg)
+      speak(msg)
+      return
+    }
+
     // "High contrast"
     if (text.includes('high contrast') || text.includes('contrast mode') || text.includes('dark mode')) {
       setHighContrast(prev => !prev)
