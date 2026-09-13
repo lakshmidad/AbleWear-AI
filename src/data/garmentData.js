@@ -276,18 +276,18 @@ export const CATALOG_ITEMS = [
 export const AVAILABLE_ALTERATIONS = [
   {
     id: 'alt-magnetic-snaps',
-    title: 'Convert front buttons to hidden magnetic snaps',
-    description: 'Replaces tiny fiddly buttonholes with concealed neodymium magnetic closures that snap shut automatically.',
+    title: 'Convert standard buttons to concealed magnetic closures',
+    description: 'Replaces standard stiff buttons with concealed high-strength neodymium magnetic closures that snap shut with 1 touch.',
     targetNeed: 'Fine Motor Difficulty',
     category: 'dexterity',
     price: 15.00,
     turnaroundHours: 48,
-    recommendedFor: ['Fine Motor Difficulty', 'Tremors', 'Single-Hand Operation Only']
+    recommendedFor: ['Fine Motor Difficulty', 'Tremors', 'Single-Hand Operation Only', 'Reduced Hand Strength']
   },
   {
     id: 'alt-side-zippers',
-    title: 'Add side-seam zipper for easy seated access',
-    description: 'Installs full-length or half-length two-way soft zippers with oversized ring pull along outer garment seam.',
+    title: 'Side-seam zipper addition',
+    description: 'Installs full or partial side-seam breakaway zippers with oversized ring pull for easy seated or bed-bound dressing.',
     targetNeed: 'Wheelchair / Seated Posture',
     category: 'mobility',
     price: 18.00,
@@ -296,13 +296,23 @@ export const AVAILABLE_ALTERATIONS = [
   },
   {
     id: 'alt-tagless-seams',
-    title: 'Remove neck tags and flatten inner seams',
-    description: 'Surgically unpicks coarse woven brand tags and binds exposed seam allowances with ultrasoft silk-cotton tape.',
+    title: 'Tag removal & seam flattening',
+    description: 'Ultrasonic tag excision and flat-lock seam tape binding to eliminate tactile skin abrasion and sensory distress.',
     targetNeed: 'Tagless Inner Collar',
     category: 'sensory',
     price: 10.00,
     turnaroundHours: 24,
     recommendedFor: ['Tagless Inner Collar', 'Flat-Felled Soft Seams']
+  },
+  {
+    id: 'alt-elastic-waist',
+    title: 'Elastic waist retrofit',
+    description: 'Replaces rigid non-flexible waistband with soft, wide internal elastic band providing up to 4 inches of gentle stretch.',
+    targetNeed: 'Elastic Waistband',
+    category: 'mobility',
+    price: 14.00,
+    turnaroundHours: 36,
+    recommendedFor: ['Elastic Waistband', 'Wheelchair / Seated Posture', 'Reduced Hand Strength']
   },
   {
     id: 'alt-pull-loops',
@@ -313,30 +323,20 @@ export const AVAILABLE_ALTERATIONS = [
     price: 12.00,
     turnaroundHours: 36,
     recommendedFor: ['Reduced Hand Strength', 'Fine Motor Difficulty']
-  },
-  {
-    id: 'alt-back-rise',
-    title: 'Extend rear rise & back length (+3 inches)',
-    description: 'Inserts color-matched ergonomic wedge gusset into lower back to prevent gap exposure when seated in wheelchair.',
-    targetNeed: 'Wheelchair / Seated Posture',
-    category: 'mobility',
-    price: 20.00,
-    turnaroundHours: 48,
-    recommendedFor: ['Wheelchair / Seated Posture']
   }
 ]
 
 export const LOCAL_TAILORS = [
   {
     id: 'tailor-1',
-    name: 'City Adaptive Sewing Hub',
+    name: 'City Adaptive Sewing Studio',
     address: '142 Independence Blvd, Suite 3B',
     distance: '2.4 miles away',
     turnaround: '48-hour delivery',
     rating: 4.9,
     reviews: 87,
     verifiedBadge: 'Master Adaptive Certified',
-    specialties: ['Magnetic Snap Retrofits', 'Side Seam Zipper Conversions', 'Wheelchair Rise Adjustments'],
+    specialties: ['Concealed Magnetic Closures', 'Side-Seam Zipper Addition', 'Seated Waist Retrofitting'],
     phone: '(555) 349-2910',
     isOpen: true
   },

@@ -20,25 +20,36 @@ export default function OrderTrackingModal() {
     isTrackingOpen, 
     setIsTrackingOpen, 
     orderStatus, 
+    orderHistory,
     setCurrentStep, 
     highContrast,
     speak 
   } = useAccessibility()
 
   const [searchQuery, setSearchQuery] = useState('')
-  const [searchedOrder, setSearchedOrder] = useState(orderStatus)
+  const [activeOrderIndex, setActiveOrderIndex] = useState(0)
 
   if (!isTrackingOpen) return null
 
+  const ordersList = orderHistory && orderHistory.length > 0 ? orderHistory : [orderStatus]
+  const currentOrder = ordersList[activeOrderIndex] || orderStatus
+
   const handleSearch = (e) => {
     e.preventDefault()
-    if (orderStatus) {
-      setSearchedOrder(orderStatus)
-      speak(`Displaying tracking status for Order ID ${orderStatus.orderId}.`)
+    if (searchQuery.trim()) {
+      const matchIndex = ordersList.findIndex(o => 
+        o.orderId.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      if (matchIndex !== -1) {
+        setActiveOrderIndex(matchIndex)
+        speak(`Found and loaded Order ID ${ordersList[matchIndex].orderId}.`)
+      } else {
+        speak('No order matched that ID.')
+      }
     }
   }
 
-  const order = searchedOrder || orderStatus
+  const order = currentOrder
 
   const pipelineStages = [
     { step: 1, label: 'Request Sent', desc: 'Order transmitted to tailor' },
