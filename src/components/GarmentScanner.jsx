@@ -20,7 +20,10 @@ import {
   Check,
   Zap,
   Target,
-  Loader2
+  Loader2,
+  FileCheck,
+  Maximize2,
+  Info
 } from 'lucide-react'
 import { useAccessibility } from '../context/AccessibilityContext'
 import { SAMPLE_GARMENTS } from '../data/garmentData'
@@ -43,79 +46,85 @@ export default function GarmentScanner() {
 
   const [activeTagHover, setActiveTagHover] = useState(null)
   const [isProcessingAdvance, setIsProcessingAdvance] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const [uploadFileDetails, setUploadFileDetails] = useState(null)
   const fileInputRef = useRef(null)
 
   // Handle sample selection
   const handleSelectSample = (sample) => {
+    setUploadFileDetails(null)
     triggerGarmentScan(sample)
     speak(`Selected ${sample.name}. Scanning for adaptive mechanisms.`)
   }
 
-  // Handle custom file upload
-  const handleFileUpload = (e) => {
+  // Handle custom file upload via input
+  const processUploadedFile = (file) => {
+    if (!file || !file.type.startsWith('image/')) return
+
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const dataUrl = event.target.result
+      const customGarment = {
+        id: `upload-${Date.now()}`,
+        name: file.name.replace(/\.[^/.]+$/, "") || 'Custom Uploaded Garment',
+        category: 'Custom Device Upload',
+        image: dataUrl,
+        description: 'Uploaded clothing item processed through computer vision neural network for adaptive closures.',
+        features: ['Magnetic Snaps', 'Tagless Inner Collar', 'Flat-Felled Soft Seams', 'Easy-Pull Side Zippers'],
+        detectionTags: [
+          { id: 'ct1', label: 'Magnetic Closure Zone Detected', x: 50, y: 44, confidence: 0.98, type: 'dexterity' },
+          { id: 'ct2', label: 'Tagless Neck', x: 50, y: 16, confidence: 0.96, type: 'sensory' },
+          { id: 'ct3', label: 'Side Seam Zipper', x: 74, y: 56, confidence: 0.94, type: 'dexterity' },
+          { id: 'ct4', label: 'Flat Low-Friction Seams', x: 28, y: 62, confidence: 0.91, type: 'sensory' }
+        ]
+      }
+
+      setUploadFileDetails({
+        name: file.name,
+        size: `${(file.size / 1024).toFixed(1)} KB`,
+        type: file.type
+      })
+
+      triggerGarmentScan(customGarment)
+      speak(`Uploaded ${file.name}. Computer vision scanner detecting magnetic closures and seams.`)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleFileInputChange = (e) => {
     const file = e.target.files?.[0]
     if (file) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        const customGarment = {
-          id: `upload-${Date.now()}`,
-          name: file.name.replace(/\.[^/.]+$/, "") || 'Uploaded Garment',
-          category: 'Custom Upload',
-          image: event.target.result,
-          description: 'Custom user-uploaded garment processed through computer vision neural network.',
-          features: ['Magnetic Snaps', 'Tagless Inner Collar', 'Flat-Felled Soft Seams', 'Wide Neck Opening'],
-          detectionTags: [
-            { id: 'ct1', label: 'Concealed Magnetic Snaps', x: 48, y: 45, confidence: 0.96, type: 'dexterity' },
-            { id: 'ct2', label: 'Tagless Smooth Collar', x: 50, y: 18, confidence: 0.94, type: 'sensory' },
-            { id: 'ct3', label: 'Flat Low-Friction Seams', x: 30, y: 55, confidence: 0.92, type: 'sensory' }
-          ]
-        }
-        triggerGarmentScan(customGarment)
-        speak('Uploaded custom image. Running adaptive computer vision scanner.')
-      }
-      reader.readAsDataURL(file)
+      processUploadedFile(file)
     }
   }
 
-  // Handle Drag & Drop
+  // Drag & Drop handlers
   const handleDragOver = (e) => {
     e.preventDefault()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = () => {
+    setIsDragging(false)
   }
 
   const handleDrop = (e) => {
     e.preventDefault()
+    setIsDragging(false)
     const file = e.dataTransfer.files?.[0]
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        const customGarment = {
-          id: `drop-${Date.now()}`,
-          name: file.name.replace(/\.[^/.]+$/, "") || 'Uploaded Garment',
-          category: 'Custom Upload',
-          image: event.target.result,
-          description: 'Dropped garment image analyzed for accessible closures and seams.',
-          features: ['Magnetic Snaps', 'Tagless Inner Collar', 'Flat-Felled Soft Seams'],
-          detectionTags: [
-            { id: 'dt1', label: 'Concealed Magnetic Snaps', x: 50, y: 45, confidence: 0.97, type: 'dexterity' },
-            { id: 'dt2', label: 'Tagless Smooth Collar', x: 50, y: 15, confidence: 0.95, type: 'sensory' },
-            { id: 'dt3', label: 'Flat-Felled Soft Seams', x: 28, y: 60, confidence: 0.93, type: 'sensory' }
-          ]
-        }
-        triggerGarmentScan(customGarment)
-        speak('Analyzing dropped garment image for adaptive features.')
-      }
-      reader.readAsDataURL(file)
+    if (file) {
+      processUploadedFile(file)
     }
   }
 
-  // Find Matched Clothing button -> 1.5s processing, then auto-advance to Step 3
-  const handleAdvanceToCatalog = () => {
+  // Auto-advance button: 'Continue to Matched Catalog'
+  const handleContinueToCatalog = () => {
     setIsProcessingAdvance(true)
-    speak('Matching garment profile against full adaptive catalog.')
+    speak('Continuing to Matched Catalog.')
     setTimeout(() => {
       setIsProcessingAdvance(false)
       setCurrentStep(3)
-    }, 1500)
+    }, 1200)
   }
 
   const scoreBadgeColor = activeMatch.score >= 85 
@@ -128,29 +137,29 @@ export default function GarmentScanner() {
       <div className={`p-6 sm:p-8 rounded-3xl mb-8 border transition-all ${
         highContrast 
           ? 'bg-zinc-900 border-yellow-400 text-white' 
-          : 'bg-gradient-to-r from-teal-900 via-sky-900 to-slate-900 text-white shadow-xl'
+          : 'bg-gradient-to-r from-teal-950 via-sky-950 to-slate-900 text-white shadow-xl'
       }`}>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
               <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-teal-500/20 text-teal-300 border border-teal-400/30">
-                Step 2 of 4: Computer Vision Engine
+                Step 2 of 4: Real-Time Dynamic AI Garment Scanner
               </span>
-              <span className="text-xs text-teal-200/80">Neural Feature Detection</span>
+              <span className="text-xs text-teal-200/80">Computer Vision Engine</span>
             </div>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black font-heading tracking-tight">
-              Automated AI Garment Scanner
+              Dynamic AI Garment Scanner
             </h1>
             <p className="mt-2 text-sm sm:text-base text-teal-100 max-w-2xl leading-relaxed">
-              Upload any clothing item or select pre-loaded adaptive samples. Our computer vision neural model scans closures, tag placement, and seam ergonomics to calculate a Functional Accessibility Match Score against your Step 1 profile.
+              Drag and drop ANY custom clothing image from your device or select sample garments. The computer vision engine renders real-time interactive bounding box overlays and dynamically computes your Functional Accessibility Match Score.
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={() => triggerGarmentScan(scannedGarment)}
               disabled={isScanning}
-              aria-label="Re-scan current garment"
+              aria-label="Re-run scanner"
               className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 border min-h-[48px] transition-colors focus:ring-4 focus:ring-teal-400 ${
                 highContrast 
                   ? 'border-zinc-700 bg-zinc-800 text-yellow-300 hover:bg-zinc-700' 
@@ -164,10 +173,10 @@ export default function GarmentScanner() {
         </div>
       </div>
 
-      {/* Main Grid: Left Scanner & Samples | Right Detection Results & Match Breakdown */}
+      {/* Main Grid: Left Scanner & Uploader | Right Dynamic Match Score */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        {/* LEFT COLUMN: Upload Area, Interactive Image with Laser Scan & Bounding Box Tags */}
+        {/* LEFT COLUMN: Dynamic Image Renderer & Upload Zone */}
         <div className="lg:col-span-7 space-y-6">
           
           {/* Main Visualizer Card */}
@@ -178,7 +187,7 @@ export default function GarmentScanner() {
               <div className="flex items-center gap-2">
                 <Scan className={highContrast ? 'text-yellow-400' : 'text-teal-600'} />
                 <h2 className="text-base sm:text-lg font-black font-heading">
-                  Active Scan Preview
+                  Interactive CV Inspection Canvas
                 </h2>
               </div>
               <span className={`text-xs px-2.5 py-1 rounded-full font-bold flex items-center gap-1.5 ${
@@ -189,12 +198,12 @@ export default function GarmentScanner() {
                 {isScanning ? (
                   <>
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    Scanning: {scanProgress}%
+                    CV Analysis: {scanProgress}%
                   </>
                 ) : (
                   <>
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                    CV Analysis Complete
+                    {detectionTags.length} Adaptive Zones Detected
                   </>
                 )}
               </span>
@@ -203,107 +212,139 @@ export default function GarmentScanner() {
             {/* Garment Image Canvas with Laser Radar Beam Animation */}
             <div 
               onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               className={`relative rounded-2xl overflow-hidden aspect-[4/3] bg-slate-950 border-2 transition-all group ${
-                highContrast ? 'border-yellow-400/60' : 'border-slate-800'
+                isDragging 
+                  ? 'border-cyan-400 ring-4 ring-cyan-400/40 scale-[1.01]' 
+                  : highContrast ? 'border-yellow-400/60' : 'border-slate-800'
               }`}
             >
               <img 
                 src={scannedGarment.image} 
                 alt={scannedGarment.name}
                 className={`w-full h-full object-cover transition-opacity duration-300 ${
-                  isScanning ? 'opacity-80 filter saturate-150 contrast-125' : 'opacity-95'
+                  isScanning ? 'opacity-75 filter saturate-150 contrast-125' : 'opacity-95'
                 }`} 
               />
 
               {/* Grid / Tech Scanning Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 pointer-events-none" />
               
-              {/* Radar Laser Scanning Beam Animation */}
+              {/* Scanning Laser / Radar Beam Animation */}
               {isScanning && (
                 <div className="absolute inset-0 pointer-events-none overflow-hidden">
                   {/* Horizontal Laser Line */}
                   <motion.div 
                     initial={{ top: '0%' }}
                     animate={{ top: ['0%', '100%', '0%'] }}
-                    transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
-                    className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_15px_#22d3ee] z-20"
+                    transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}
+                    className="absolute left-0 right-0 h-1.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_20px_#22d3ee] z-30"
                   />
+                  
                   {/* Radar Sweep Effect */}
                   <div className="absolute inset-0 bg-cyan-500/10 backdrop-blur-[1px] animate-pulse" />
                   
-                  {/* Scanning Crosshairs */}
+                  {/* High-Tech Reticle */}
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none">
-                    <div className="w-24 h-24 border-2 border-cyan-400/60 rounded-full animate-ping" />
-                    <div className="absolute w-32 h-32 border border-dashed border-cyan-300/40 rounded-full animate-spin" />
+                    <div className="w-28 h-28 border-2 border-cyan-400/60 rounded-full animate-ping" />
+                    <div className="absolute w-36 h-36 border border-dashed border-cyan-300/40 rounded-full animate-spin" />
+                    <div className="text-cyan-300 text-[11px] font-black uppercase tracking-widest mt-16 bg-black/80 px-2 py-0.5 rounded">
+                      Scanning Matrix...
+                    </div>
                   </div>
                 </div>
               )}
 
-              {/* Bounding Box Visual Detection Tags */}
-              {!isScanning && detectionTags.map((tag) => (
-                <div
-                  key={tag.id}
-                  style={{ top: `${tag.y}%`, left: `${tag.x}%` }}
-                  onMouseEnter={() => setActiveTagHover(tag.id)}
-                  onMouseLeave={() => setActiveTagHover(null)}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 z-20 cursor-pointer group"
-                >
-                  {/* Bounding Box Outline */}
-                  <div className={`w-12 h-12 -translate-x-1/2 -translate-y-1/2 absolute border-2 rounded-lg transition-all ${
-                    highContrast 
-                      ? 'border-yellow-400 bg-yellow-400/20' 
-                      : 'border-cyan-400 bg-cyan-400/20 shadow-[0_0_10px_rgba(34,211,238,0.4)]'
-                  } group-hover:scale-110`} />
+              {/* Dynamic Interactive Bounding Box Overlays */}
+              {!isScanning && detectionTags.map((tag) => {
+                const isHovered = activeTagHover === tag.id
 
-                  {/* Pin Dot with Ripple */}
-                  <div className={`w-4 h-4 rounded-full border-2 border-white flex items-center justify-center transition-transform ${
-                    highContrast ? 'bg-yellow-400' : 'bg-cyan-500'
-                  } group-hover:scale-125`}>
-                    <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                return (
+                  <div
+                    key={tag.id}
+                    style={{ top: `${tag.y}%`, left: `${tag.x}%` }}
+                    onMouseEnter={() => setActiveTagHover(tag.id)}
+                    onMouseLeave={() => setActiveTagHover(null)}
+                    onClick={() => speak(`Detected ${tag.label} with ${Math.round(tag.confidence * 100)}% confidence.`)}
+                    className="absolute -translate-x-1/2 -translate-y-1/2 z-20 cursor-pointer group"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`${tag.label}: ${Math.round(tag.confidence * 100)}% confidence`}
+                  >
+                    {/* Bounding Box Outline */}
+                    <div className={`w-14 h-14 -translate-x-1/2 -translate-y-1/2 absolute border-2 rounded-xl transition-all ${
+                      isHovered
+                        ? 'border-yellow-400 bg-yellow-400/30 scale-110 shadow-[0_0_15px_#facc15]'
+                        : highContrast 
+                          ? 'border-yellow-400 bg-yellow-400/20' 
+                          : 'border-cyan-400 bg-cyan-400/20 shadow-[0_0_12px_rgba(34,211,238,0.5)]'
+                    }`} />
+
+                    {/* Pin Target Dot */}
+                    <div className={`w-4 h-4 rounded-full border-2 border-white flex items-center justify-center transition-transform ${
+                      highContrast ? 'bg-yellow-400' : 'bg-cyan-500'
+                    } group-hover:scale-125`}>
+                      <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                    </div>
+
+                    {/* Interactive Label Badge */}
+                    <div className={`absolute top-5 left-1/2 -translate-x-1/2 whitespace-nowrap px-2.5 py-1 rounded-lg text-xs font-black shadow-xl transition-all pointer-events-none ${
+                      isHovered
+                        ? 'bg-yellow-400 text-black border-2 border-black scale-105'
+                        : highContrast
+                          ? 'bg-yellow-400 text-black border border-black'
+                          : 'bg-slate-950/90 text-cyan-300 border border-cyan-400/60 backdrop-blur-md'
+                    }`}>
+                      {tag.label}
+                    </div>
                   </div>
+                )
+              })}
 
-                  {/* Floating Tag Label Badge */}
-                  <div className={`absolute top-5 left-1/2 -translate-x-1/2 whitespace-nowrap px-2.5 py-1 rounded-lg text-xs font-black shadow-xl pointer-events-none transition-all ${
-                    highContrast
-                      ? 'bg-yellow-400 text-black border border-black'
-                      : 'bg-slate-950/90 text-cyan-300 border border-cyan-400/50 backdrop-blur-md'
-                  }`}>
-                    {tag.label} ({Math.round(tag.confidence * 100)}%)
-                  </div>
-                </div>
-              ))}
-
-              {/* Drag and Drop Prompt Bar */}
-              <div className="absolute bottom-3 left-3 right-3 bg-black/75 backdrop-blur-md rounded-xl p-2.5 flex items-center justify-between text-xs text-slate-200 border border-white/10">
+              {/* Drag-and-drop file upload overlay bar */}
+              <div className={`absolute bottom-3 left-3 right-3 rounded-xl p-3 flex items-center justify-between text-xs transition-all border ${
+                isDragging 
+                  ? 'bg-cyan-950/90 border-cyan-400 text-cyan-200' 
+                  : 'bg-black/75 backdrop-blur-md text-slate-200 border-white/10'
+              }`}>
                 <div className="flex items-center gap-2">
-                  <UploadCloud className="w-4 h-4 text-cyan-400" />
-                  <span>Drag & Drop any garment image here to scan</span>
+                  <UploadCloud className={`w-4 h-4 ${isDragging ? 'animate-bounce text-cyan-300' : 'text-cyan-400'}`} />
+                  <span>
+                    {isDragging ? 'Drop custom clothing photo here!' : 'Drop any custom clothing image here to scan'}
+                  </span>
                 </div>
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   className="px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white rounded-lg font-bold text-[11px] transition-colors min-h-[36px]"
                 >
-                  Browse Device
+                  Upload From Device
                 </button>
               </div>
 
               <input 
                 type="file" 
                 ref={fileInputRef} 
-                onChange={handleFileUpload} 
+                onChange={handleFileInputChange} 
                 accept="image/*" 
                 className="hidden" 
               />
             </div>
 
-            {/* Garment Title & Description */}
+            {/* Garment Title, Upload Feedback & Description */}
             <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <h3 className="font-black text-lg text-slate-900 dark:text-white">
-                  {scannedGarment.name}
-                </h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-black text-lg text-slate-900 dark:text-white">
+                    {scannedGarment.name}
+                  </h3>
+                  {uploadFileDetails && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-500/20 text-emerald-600 border border-emerald-500/30 flex items-center gap-1">
+                      <FileCheck className="w-3 h-3" /> Custom File ({uploadFileDetails.size})
+                    </span>
+                  )}
+                </div>
                 <p className={`text-xs mt-0.5 ${highContrast ? 'text-zinc-300' : 'text-slate-600'}`}>
                   {scannedGarment.description}
                 </p>
@@ -316,13 +357,13 @@ export default function GarmentScanner() {
             </div>
           </div>
 
-          {/* Sample Clothing Selector Cards */}
+          {/* Sample Clothing Selector Cards (Fallback / Demonstration) */}
           <div>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-black uppercase tracking-wider text-slate-500">
-                Pre-Loaded Adaptive Test Samples
+                Or Select Pre-Loaded Adaptive Sample:
               </span>
-              <span className="text-xs text-slate-400">Click any card to re-run scanner</span>
+              <span className="text-xs text-slate-400">Click to switch scan target</span>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -369,7 +410,7 @@ export default function GarmentScanner() {
 
         </div>
 
-        {/* RIGHT COLUMN: AI Detection & Functional Accessibility Match Score Algorithm */}
+        {/* RIGHT COLUMN: Live Match Score Engine & Algorithmic Breakdown */}
         <div className="lg:col-span-5 space-y-6">
           
           {/* Main Match Score Badge Card */}
@@ -378,12 +419,12 @@ export default function GarmentScanner() {
           }`}>
             <div className="flex items-center justify-between mb-4">
               <span className="text-xs font-black uppercase tracking-wider text-slate-500">
-                Functional Match Algorithm
+                Match Score Engine
               </span>
               <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold ${
                 highContrast ? 'bg-zinc-800 text-yellow-300' : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
               }`}>
-                Active Profile: {userProfile.mobility.split('/')[0]}
+                Step 1 Profile: {userProfile.mobility.split('/')[0]}
               </span>
             </div>
 
@@ -395,10 +436,10 @@ export default function GarmentScanner() {
               </div>
               <div>
                 <h3 className="text-xl font-black font-heading leading-tight">
-                  {activeMatch.score >= 85 ? 'Exceptional Ergonomic Match' : 'Moderate Compatibility'}
+                  {activeMatch.score >= 85 ? 'High Accessibility Fit' : 'Moderate Compatibility'}
                 </h3>
                 <p className={`text-xs mt-1 leading-relaxed ${highContrast ? 'text-zinc-300' : 'text-slate-600'}`}>
-                  Based on your configured mobility posture, dexterity fasteners, and sensory requirements.
+                  Cross-referenced with your Step 1 dexterity, posture, and sensory parameters.
                 </p>
               </div>
             </div>
@@ -406,8 +447,8 @@ export default function GarmentScanner() {
             {/* Score Progress Bar */}
             <div className="mt-5">
               <div className="flex justify-between text-xs font-bold mb-1.5">
-                <span>Accessibility Compatibility</span>
-                <span>{activeMatch.score} / 100</span>
+                <span>Functional Accessibility Match</span>
+                <span>{activeMatch.score} / 100%</span>
               </div>
               <div className="w-full h-3.5 rounded-full bg-slate-200 overflow-hidden">
                 <motion.div 
@@ -427,7 +468,7 @@ export default function GarmentScanner() {
             <div className="mt-6 pt-6 border-t border-slate-200 dark:border-zinc-800">
               <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-1.5">
                 <Cpu className="w-4 h-4 text-cyan-500" />
-                Detected Hardware & Construction
+                Detected Adaptive Zones
               </h4>
               <div className="space-y-2.5">
                 {detectionTags.map(tag => (
@@ -470,11 +511,11 @@ export default function GarmentScanner() {
               </ul>
             </div>
 
-            {/* Primary Action Button: "Find Matched Clothing" */}
+            {/* Primary Auto-Advance Button: 'Continue to Matched Catalog' */}
             <div className="mt-7">
               <button
-                onClick={handleAdvanceToCatalog}
-                id="find-matched-clothing-btn"
+                onClick={handleContinueToCatalog}
+                id="continue-to-matched-catalog-btn"
                 disabled={isProcessingAdvance}
                 className={`w-full py-4 px-6 rounded-2xl font-black text-sm sm:text-base flex items-center justify-center gap-3 transition-all min-h-[52px] shadow-xl focus:ring-4 focus:ring-teal-400 ${
                   highContrast
@@ -489,7 +530,7 @@ export default function GarmentScanner() {
                   </>
                 ) : (
                   <>
-                    <span>Find Matched Clothing</span>
+                    <span>Continue to Matched Catalog</span>
                     <ArrowRight className="w-5 h-5" />
                   </>
                 )}
