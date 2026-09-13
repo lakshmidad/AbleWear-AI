@@ -36,19 +36,33 @@ export function AccessibilityProvider({ children }) {
   const [customInstructions, setCustomInstructions] = useState('')
   const [assignedTailor, setAssignedTailor] = useState(LOCAL_TAILORS[0])
   
-  // Order Tracking State
+  // Order Tracking State & History
   const [isTrackingOpen, setIsTrackingOpen] = useState(false)
+  const [orderHistory, setOrderHistory] = useState([
+    {
+      orderId: 'ADAPT-849201',
+      date: 'Sep 13, 2026',
+      status: 'In Sewing',
+      trackingStep: 3,
+      totalFee: 63.00,
+      turnaround: '48-hour delivery',
+      assignedTailor: LOCAL_TAILORS[0],
+      selectedGarment: CATALOG_ITEMS[0],
+      alterations: [AVAILABLE_ALTERATIONS[0], AVAILABLE_ALTERATIONS[2]],
+      notes: 'Concealed magnetic closures on front placket; smooth neckline seam tape.'
+    }
+  ])
   const [orderStatus, setOrderStatus] = useState({
     orderId: 'ADAPT-849201',
     date: 'Sep 13, 2026',
     status: 'In Sewing',
-    trackingStep: 3, // 1: Request Sent, 2: Customization Approved, 3: In Sewing, 4: Ready for Delivery
+    trackingStep: 3,
     totalFee: 63.00,
     turnaround: '48-hour delivery',
     assignedTailor: LOCAL_TAILORS[0],
     selectedGarment: CATALOG_ITEMS[0],
     alterations: [AVAILABLE_ALTERATIONS[0], AVAILABLE_ALTERATIONS[2]],
-    notes: 'Magnetic snap conversion on front placket; smooth neckline seam tape.'
+    notes: 'Concealed magnetic closures on front placket; smooth neckline seam tape.'
   })
 
   // 7. Voice Assistant State (Hands-free control)
@@ -91,7 +105,7 @@ export function AccessibilityProvider({ children }) {
     // 2. Dexterity criteria (weight: 35)
     totalWeight += 35
     const hasDexterityMatch = profile.dexterity?.some(d => {
-      if (d === 'Fine Motor Difficulty' || d === 'Reduced Hand Strength' || d === 'Single-Hand Operation Only') {
+      if (d === 'Fine Motor Difficulty' || d === 'Reduced Hand Strength' || d === 'Single-Hand Operation Only' || d === 'Tremors') {
         return garment.features?.some(f => 
           f.toLowerCase().includes('magnetic') || 
           f.toLowerCase().includes('zipper') || 
@@ -138,12 +152,12 @@ export function AccessibilityProvider({ children }) {
   // Intelligent Pre-Filling of Alterations when User Profile changes
   useEffect(() => {
     const recommendedIds = []
-    if (userProfile.dexterity?.includes('Fine Motor Difficulty') || userProfile.dexterity?.includes('Tremors') || userProfile.dexterity?.includes('Single-Hand Operation Only')) {
+    if (userProfile.dexterity?.includes('Fine Motor Difficulty') || userProfile.dexterity?.includes('Tremors') || userProfile.dexterity?.includes('Single-Hand Operation Only') || userProfile.dexterity?.includes('Reduced Hand Strength')) {
       recommendedIds.push('alt-magnetic-snaps')
     }
     if (userProfile.mobility === 'Wheelchair / Seated Posture') {
       recommendedIds.push('alt-side-zippers')
-      recommendedIds.push('alt-back-rise')
+      recommendedIds.push('alt-elastic-waist')
     }
     if (userProfile.sensory?.includes('Tagless Inner Collar') || userProfile.sensory?.includes('Flat-Felled Soft Seams')) {
       recommendedIds.push('alt-tagless-seams')
@@ -404,6 +418,7 @@ export function AccessibilityProvider({ children }) {
       notes: customInstructions
     }
     setOrderStatus(newOrder)
+    setOrderHistory(prev => [newOrder, ...prev])
     speak(`Customization request submitted successfully with Order ID ${orderId}. Matched with ${assignedTailor.name}.`)
     return newOrder
   }
@@ -445,6 +460,8 @@ export function AccessibilityProvider({ children }) {
     setAssignedTailor,
     orderStatus,
     setOrderStatus,
+    orderHistory,
+    setOrderHistory,
     isTrackingOpen,
     setIsTrackingOpen,
     submitOrder,
