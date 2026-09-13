@@ -5,14 +5,15 @@ import GarmentScanner from './components/GarmentScanner'
 import AdaptiveCatalog from './components/AdaptiveCatalog'
 import CustomizationPortal from './components/CustomizationPortal'
 import FitSimulator from './components/FitSimulator'
+import TailorDispatchHub from './components/TailorDispatchHub'
 import VoiceAssistantOverlay from './components/VoiceAssistantOverlay'
 import Footer from './components/Footer'
-import { Sliders, Sparkles, ShoppingBag, Scissors, ArrowRight, Scan, Activity } from 'lucide-react'
+import { Sliders, Sparkles, ShoppingBag, Scissors, ArrowRight, Scan, Activity, Truck } from 'lucide-react'
 
 export default function App() {
   const [highContrast, setHighContrast] = useState(false)
   const [largeText, setLargeText] = useState(false)
-  const [currentStep, setCurrentStep] = useState(5) // Default to Step 5 so user directly sees Feature 6 output!
+  const [currentStep, setCurrentStep] = useState(6) // Default to Step 6 so user directly sees Feature 7 output!
   const [preselectedGarment, setPreselectedGarment] = useState(null)
   const [catalogFilter, setCatalogFilter] = useState('All Items')
 
@@ -66,6 +67,13 @@ export default function App() {
       available: true, 
       icon: Activity, 
       desc: 'Seated vs Standing Posture' 
+    },
+    { 
+      id: 6, 
+      name: 'Tailor Hub', 
+      available: true, 
+      icon: Truck, 
+      desc: 'Smart Local Dispatch Network' 
     }
   ]
 
@@ -125,7 +133,6 @@ export default function App() {
     if (
       text.includes('request customization') || 
       text.includes('customization') || 
-      text.includes('tailor') || 
       text.includes('modification') ||
       text.includes('alteration')
     ) {
@@ -161,6 +168,20 @@ export default function App() {
       setCurrentStep(5)
       setVoiceFeedbackMessage('Opened 3D Posture Fit Simulator.')
       speak('Opening 3D seated versus standing body posture simulator.')
+      return
+    }
+
+    // 6. "Tailor Hub" / "Local Tailors" / "Tailor Dispatch"
+    if (
+      text.includes('tailor hub') || 
+      text.includes('local tailors') || 
+      text.includes('tailor dispatch') || 
+      text.includes('dispatch') ||
+      text.includes('routing network')
+    ) {
+      setCurrentStep(6)
+      setVoiceFeedbackMessage('Opened Smart Local Tailor Dispatch Hub.')
+      speak('Opening smart local adaptive tailor routing network and dispatch hub.')
       return
     }
 
@@ -290,7 +311,7 @@ export default function App() {
         
         {/* Prototype Stepper with Instant Switching across all Main Screens */}
         <div className="mb-8 overflow-x-auto pb-2">
-          <div className="flex items-center min-w-[850px] justify-between gap-3">
+          <div className="flex items-center min-w-[980px] justify-between gap-3">
             {steps.map((step, idx) => {
               const IconComp = step.icon
               const isCurrent = currentStep === step.id
@@ -407,6 +428,15 @@ export default function App() {
             highContrast={highContrast}
             largeText={largeText}
             onNavigateToCustomization={handleNavigateToCustomization}
+          />
+        )}
+
+        {/* Screen 6: Smart Local Adaptive Tailor Network (Tailor Hub) */}
+        {currentStep === 6 && (
+          <TailorDispatchHub 
+            userProfile={profile}
+            highContrast={highContrast}
+            largeText={largeText}
           />
         )}
 
