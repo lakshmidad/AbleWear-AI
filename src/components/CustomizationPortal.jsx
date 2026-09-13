@@ -94,25 +94,31 @@ export default function CustomizationPortal() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-      {/* Step Header Banner */}
-      <div className={`p-6 sm:p-8 rounded-3xl mb-8 border transition-all ${
+    <div className="w-full max-w-[1200px] mx-auto py-2 px-0 sm:px-2">
+      {/* Header Card */}
+      <div className={`p-6 sm:p-7 rounded-2xl mb-8 border transition-all ${
         highContrast 
-          ? 'bg-zinc-900 border-yellow-400 text-white' 
-          : 'bg-gradient-to-r from-emerald-950 via-slate-900 to-sky-950 text-white shadow-xl'
+          ? 'bg-zinc-950 border-yellow-400 text-white' 
+          : 'bg-white border-slate-200 text-slate-900 shadow-sm'
       }`}>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                Step 4 of 4: Customization & Dispatch
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ${
+                highContrast ? 'bg-yellow-400 text-black' : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+              }`}>
+                Step 4 of 4
               </span>
-              <span className="text-xs text-emerald-200/80">Local Certified Tailor Network</span>
+              <span className={`text-xs ${highContrast ? 'text-zinc-400' : 'text-slate-500'}`}>
+                Local Certified Tailor Network
+              </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black font-heading tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black font-heading tracking-tight">
               Customization Portal & Local Tailor Dispatch
             </h1>
-            <p className="mt-2 text-sm sm:text-base text-emerald-100 max-w-2xl leading-relaxed">
+            <p className={`mt-1.5 text-sm max-w-2xl leading-relaxed ${
+              highContrast ? 'text-zinc-300' : 'text-slate-600'
+            }`}>
               Review your pre-selected garment, modify intelligent pre-filled adaptive alterations tailored to your Step 1 profile, and dispatch directly to a verified local adaptive tailor with transparent pricing and 48-hour turnaround.
             </p>
           </div>
@@ -120,10 +126,10 @@ export default function CustomizationPortal() {
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => setCurrentStep(3)}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold border min-h-[48px] transition-colors focus:ring-4 focus:ring-emerald-400 ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold border min-h-[44px] transition-colors focus:ring-4 focus:ring-emerald-400 ${
                 highContrast 
                   ? 'border-zinc-700 bg-zinc-800 text-yellow-300 hover:bg-zinc-700' 
-                  : 'border-white/20 bg-white/10 hover:bg-white/20 text-white'
+                  : 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
               }`}
             >
               Change Selected Garment
