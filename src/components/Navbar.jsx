@@ -13,7 +13,8 @@ export default function Navbar() {
     isListening,
     toggleListening,
     isSpeaking,
-    setIsTrackingOpen
+    setIsTrackingOpen,
+    orderHistory
   } = useAccessibility()
 
   const wizardSteps = [
@@ -21,7 +22,8 @@ export default function Navbar() {
     { id: 1, name: 'Profile', label: '1. Profile', desc: 'Mobility & Needs' },
     { id: 2, name: 'AI Scanner', label: '2. AI Scanner', desc: 'Feature Detection' },
     { id: 3, name: 'Matched Catalog', label: '3. Matched Catalog', desc: 'Fit Simulator' },
-    { id: 4, name: 'Customization & Dispatch', label: '4. Customization & Dispatch', desc: 'Local Tailor' }
+    { id: 4, name: 'Customization & Dispatch', label: '4. Customization & Dispatch', desc: 'Local Tailor' },
+    { id: 5, name: 'My Orders', label: '5. My Orders & Tracker', desc: 'Flipkart Live Status' }
   ]
 
   return (
@@ -81,16 +83,27 @@ export default function Navbar() {
             
             {/* Track Orders Quick Action */}
             <button
-              onClick={() => setIsTrackingOpen(true)}
-              aria-label="Track My Orders"
+              onClick={() => setCurrentStep(5)}
+              aria-label="Track My Orders & View Flipkart Tracker"
               className={`hidden md:flex px-3 py-2 rounded-xl text-xs font-bold items-center gap-1.5 border min-h-[44px] transition-colors focus:ring-4 focus:ring-emerald-400 ${
-                highContrast 
-                  ? 'border-yellow-400 text-yellow-300 bg-zinc-900 hover:bg-zinc-800' 
-                  : 'border-slate-300 bg-slate-100 text-slate-800 hover:bg-slate-200'
+                currentStep === 5
+                  ? highContrast ? 'bg-yellow-400 text-black border-yellow-400 font-black' : 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                  : highContrast 
+                    ? 'border-yellow-400 text-yellow-300 bg-zinc-900 hover:bg-zinc-800' 
+                    : 'border-slate-300 bg-slate-100 text-slate-800 hover:bg-slate-200'
               }`}
             >
               <PackageCheck className="w-4 h-4 text-emerald-500" />
               <span>Track Orders</span>
+              {orderHistory && orderHistory.length > 0 && (
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-black ${
+                  currentStep === 5
+                    ? highContrast ? 'bg-black text-yellow-400' : 'bg-white text-emerald-700'
+                    : highContrast ? 'bg-yellow-400 text-black' : 'bg-emerald-600 text-white'
+                }`}>
+                  {orderHistory.length}
+                </span>
+              )}
             </button>
 
             {/* Voice Control Mic Toggle with Pulsing Animation */}

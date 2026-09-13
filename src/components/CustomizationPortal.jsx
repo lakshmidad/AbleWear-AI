@@ -630,14 +630,14 @@ export default function CustomizationPortal() {
                 <button
                   onClick={() => {
                     setShowOrderModal(false)
-                    setIsTrackingOpen(true)
+                    setCurrentStep(5)
                   }}
                   className={`flex-1 py-3 px-4 rounded-xl font-bold text-xs sm:text-sm min-h-[48px] flex items-center justify-center gap-2 ${
                     highContrast ? 'bg-zinc-800 text-yellow-300 hover:bg-zinc-700' : 'bg-slate-200 text-slate-800 hover:bg-slate-300'
                   }`}
                 >
                   <PackageCheck className="w-4 h-4 text-emerald-500" />
-                  <span>Go to My Orders</span>
+                  <span>Go to My Orders & Tracker</span>
                 </button>
                 <button
                   onClick={() => {
