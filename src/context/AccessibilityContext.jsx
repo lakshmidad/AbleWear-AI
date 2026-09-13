@@ -4,8 +4,8 @@ import { SAMPLE_GARMENTS, CATALOG_ITEMS, AVAILABLE_ALTERATIONS, LOCAL_TAILORS } 
 const AccessibilityContext = createContext(null)
 
 export function AccessibilityProvider({ children }) {
-  // 1. Wizard Pipeline State: Steps 1, 2, 3, 4
-  const [currentStep, setCurrentStep] = useState(1)
+  // 1. Wizard Pipeline State: Step 0 is Landing Page, Steps 1-4 are Guided Pipeline
+  const [currentStep, setCurrentStep] = useState(0)
 
   // 2. Global Accessibility Settings (WCAG 2.1 AA)
   const [highContrast, setHighContrast] = useState(false)
@@ -35,7 +35,21 @@ export function AccessibilityProvider({ children }) {
   const [selectedAlterations, setSelectedAlterations] = useState(['alt-magnetic-snaps', 'alt-tagless-seams'])
   const [customInstructions, setCustomInstructions] = useState('')
   const [assignedTailor, setAssignedTailor] = useState(LOCAL_TAILORS[0])
-  const [orderStatus, setOrderStatus] = useState(null) // null or { orderId, date, status, trackingStep, totalFee }
+  
+  // Order Tracking State
+  const [isTrackingOpen, setIsTrackingOpen] = useState(false)
+  const [orderStatus, setOrderStatus] = useState({
+    orderId: 'ADAPT-849201',
+    date: 'Sep 13, 2026',
+    status: 'In Sewing',
+    trackingStep: 3, // 1: Request Sent, 2: Customization Approved, 3: In Sewing, 4: Ready for Delivery
+    totalFee: 63.00,
+    turnaround: '48-hour delivery',
+    assignedTailor: LOCAL_TAILORS[0],
+    selectedGarment: CATALOG_ITEMS[0],
+    alterations: [AVAILABLE_ALTERATIONS[0], AVAILABLE_ALTERATIONS[2]],
+    notes: 'Magnetic snap conversion on front placket; smooth neckline seam tape.'
+  })
 
   // 7. Voice Assistant State (Hands-free control)
   const [isListening, setIsListening] = useState(false)
@@ -119,7 +133,6 @@ export function AccessibilityProvider({ children }) {
     return { score: calculatedScore, breakdown }
   }
 
-  // Active match calculation for currently scanned garment
   const activeMatch = calculateMatchScore(scannedGarment, userProfile)
 
   // Intelligent Pre-Filling of Alterations when User Profile changes
@@ -139,7 +152,6 @@ export function AccessibilityProvider({ children }) {
       recommendedIds.push('alt-pull-loops')
     }
 
-    // Deduplicate and fallback
     const unique = [...new Set(recommendedIds)]
     setSelectedAlterations(unique.length > 0 ? unique : ['alt-magnetic-snaps', 'alt-tagless-seams'])
   }, [userProfile])
@@ -168,6 +180,33 @@ export function AccessibilityProvider({ children }) {
     const text = (rawText || '').toLowerCase().trim()
     setLastCommand(rawText)
 
+    // "Start 4-Step Guided Wizard" / "Start wizard"
+    if (text.includes('start wizard') || text.includes('guided wizard') || text.includes('start')) {
+      setCurrentStep(1)
+      const msg = 'Starting 4-Step Guided Wizard with Step 1: Accessibility Profile Builder.'
+      setVoiceFeedback(msg)
+      speak(msg)
+      return
+    }
+
+    // "Track my orders" / "Track orders"
+    if (text.includes('track my orders') || text.includes('track order') || text.includes('tracking')) {
+      setIsTrackingOpen(true)
+      const msg = 'Opening active order tracking.'
+      setVoiceFeedback(msg)
+      speak(msg)
+      return
+    }
+
+    // "Home" / "Landing page"
+    if (text.includes('home') || text.includes('landing') || text.includes('overview')) {
+      setCurrentStep(0)
+      const msg = 'Returning to AdaptiveStyle AI Home Landing Page.'
+      setVoiceFeedback(msg)
+      speak(msg)
+      return
+    }
+
     // "Next step"
     if (text.includes('next step') || text.includes('continue') || text.includes('go forward')) {
       setCurrentStep(prev => Math.min(4, prev + 1))
@@ -179,8 +218,8 @@ export function AccessibilityProvider({ children }) {
 
     // "Previous step" / "Back"
     if (text.includes('previous step') || text.includes('go back') || text.includes('last step')) {
-      setCurrentStep(prev => Math.max(1, prev - 1))
-      const msg = `Returning to Step ${Math.max(1, currentStep - 1)}.`
+      setCurrentStep(prev => Math.max(0, prev - 1))
+      const msg = `Returning to Step ${Math.max(0, currentStep - 1)}.`
       setVoiceFeedback(msg)
       speak(msg)
       return
@@ -224,26 +263,8 @@ export function AccessibilityProvider({ children }) {
       return
     }
 
-    // "Step 1" / "Profile"
-    if (text.includes('profile') || text.includes('step 1')) {
-      setCurrentStep(1)
-      const msg = 'Opened Step 1: Accessibility Profile Builder.'
-      setVoiceFeedback(msg)
-      speak(msg)
-      return
-    }
-
-    // "Step 3" / "Catalog"
-    if (text.includes('catalog') || text.includes('matched clothing') || text.includes('step 3')) {
-      setCurrentStep(3)
-      const msg = 'Opened Step 3: Personalized Accessible Catalog.'
-      setVoiceFeedback(msg)
-      speak(msg)
-      return
-    }
-
     // Fallback feedback
-    setVoiceFeedback(`Heard: "${rawText}". Try: "Next step", "Scan garment", or "Read accessibility score out loud".`)
+    setVoiceFeedback(`Heard: "${rawText}". Try: "Start wizard", "Track orders", or "Scan garment".`)
   }
 
   // Web Speech Recognition Lifecycle
@@ -289,7 +310,6 @@ export function AccessibilityProvider({ children }) {
     }
   }, [isListening])
 
-  // Toggle Speech Assistant Listening
   const toggleListening = () => {
     if (isListening) {
       setIsListening(false)
@@ -302,7 +322,7 @@ export function AccessibilityProvider({ children }) {
       speak('Voice assistant stopped.')
     } else {
       setIsListening(true)
-      setVoiceFeedback('Listening... Speak "Next step", "Scan garment", or "Read accessibility score out loud".')
+      setVoiceFeedback('Listening... Say "Start wizard", "Track orders", or "Scan garment".')
       speak('Speech assistant active. Listening for commands.')
       if (recognitionRef.current) {
         try {
@@ -314,18 +334,15 @@ export function AccessibilityProvider({ children }) {
     }
   }
 
-  // Trigger Garment Scanning Simulation (laser + tags + score)
   const triggerGarmentScan = (garmentOrFile) => {
     setIsScanning(true)
     setScanProgress(0)
     setScanCompleted(false)
 
-    // Check if it's one of our sample garments
     const matchedSample = SAMPLE_GARMENTS.find(s => s.id === garmentOrFile?.id) || SAMPLE_GARMENTS[0]
     setScannedGarment(matchedSample)
     setDetectionTags([])
 
-    // Simulated multi-stage CV detection
     let progress = 0
     const interval = setInterval(() => {
       progress += 20
@@ -339,14 +356,12 @@ export function AccessibilityProvider({ children }) {
     }, 280)
   }
 
-  // Toggle Alteration Checkbox in Step 4
   const toggleAlteration = (altId) => {
     setSelectedAlterations(prev => 
       prev.includes(altId) ? prev.filter(id => id !== altId) : [...prev, altId]
     )
   }
 
-  // Calculate Alteration Pricing and Turnaround
   const calculateOrderSummary = () => {
     const selectedAltsList = AVAILABLE_ALTERATIONS.filter(a => selectedAlterations.includes(a.id))
     const alterationsTotal = selectedAltsList.reduce((acc, curr) => acc + curr.price, 0)
@@ -362,7 +377,6 @@ export function AccessibilityProvider({ children }) {
     }
   }
 
-  // Submit Tailor Dispatch Order
   const submitOrder = () => {
     const summary = calculateOrderSummary()
     const orderId = `ADAPT-${Math.floor(100000 + Math.random() * 900000)}`
@@ -370,7 +384,7 @@ export function AccessibilityProvider({ children }) {
       orderId,
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
       status: 'Request Sent',
-      trackingStep: 1, // 1: Request Sent, 2: Customization Approved, 3: In Sewing, 4: Ready for Delivery
+      trackingStep: 1,
       totalFee: summary.totalCost,
       turnaround: `${summary.turnaroundHours}-hour delivery`,
       assignedTailor: assignedTailor,
@@ -419,6 +433,9 @@ export function AccessibilityProvider({ children }) {
     assignedTailor,
     setAssignedTailor,
     orderStatus,
+    setOrderStatus,
+    isTrackingOpen,
+    setIsTrackingOpen,
     submitOrder,
     resetOrder,
     calculateOrderSummary,
