@@ -1,7 +1,14 @@
 import React from 'react'
-import { Sparkles, Sun, Moon, Eye, Type, ShieldCheck } from 'lucide-react'
+import { Sparkles, Sun, Moon, Eye, Type, ShieldCheck, Mic, MicOff } from 'lucide-react'
 
-export default function Navbar({ highContrast, setHighContrast, largeText, setLargeText }) {
+export default function Navbar({ 
+  highContrast, 
+  setHighContrast, 
+  largeText, 
+  setLargeText,
+  isListening,
+  onToggleListening
+}) {
   return (
     <header className={`sticky top-0 z-50 border-b transition-colors duration-200 ${
       highContrast 
@@ -44,7 +51,42 @@ export default function Navbar({ highContrast, setHighContrast, largeText, setLa
           </div>
 
           {/* Accessibility Quick Controls */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            
+            {/* Voice Control Mic Toggle with Pulsing Animation */}
+            <button
+              onClick={onToggleListening}
+              id="voice-control-toggle"
+              className={`relative px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-all min-h-[44px] min-w-[44px] ${
+                isListening
+                  ? highContrast
+                    ? 'bg-yellow-400 text-black ring-4 ring-yellow-400/50 font-black'
+                    : 'bg-red-600 text-white shadow-lg shadow-red-500/40 ring-4 ring-red-400/40'
+                  : highContrast
+                    ? 'bg-zinc-800 text-zinc-200 hover:bg-zinc-700 border border-zinc-600'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300'
+              }`}
+              title={isListening ? "Voice Control Active: Listening for commands. Click to pause." : "Enable Voice-Guided Hands-Free Control"}
+              aria-label={isListening ? "Voice control active" : "Enable voice control"}
+            >
+              {isListening && (
+                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                </span>
+              )}
+
+              {isListening ? (
+                <Mic className="w-4 h-4 animate-pulse text-current" />
+              ) : (
+                <Mic className="w-4 h-4 text-slate-500 dark:text-zinc-400" />
+              )}
+              
+              <span className="hidden md:inline">
+                {isListening ? 'Voice: Listening...' : 'Voice Control'}
+              </span>
+            </button>
+
             {/* Text Zoom / Large Text Toggle */}
             <button
               onClick={() => setLargeText(!largeText)}
@@ -61,7 +103,7 @@ export default function Navbar({ highContrast, setHighContrast, largeText, setLa
               aria-label="Toggle larger text size"
             >
               <Type className="w-4 h-4" />
-              <span className="hidden sm:inline">{largeText ? 'Large Text: ON' : 'Default Text'}</span>
+              <span className="hidden sm:inline">{largeText ? 'Large: ON' : 'Default Text'}</span>
             </button>
 
             {/* High Contrast Mode Toggle */}
@@ -77,7 +119,7 @@ export default function Navbar({ highContrast, setHighContrast, largeText, setLa
               aria-label="Toggle high contrast accessibility mode"
             >
               <Eye className="w-4 h-4" />
-              <span>{highContrast ? 'High Contrast: ON' : 'High Contrast'}</span>
+              <span className="hidden sm:inline">{highContrast ? 'Contrast: ON' : 'High Contrast'}</span>
             </button>
           </div>
         </div>

@@ -128,10 +128,17 @@ export default function AdaptiveCatalog({
   highContrast, 
   largeText, 
   onNavigateToScanner,
-  onNavigateToCustomization
+  onNavigateToCustomization,
+  activeFilter,
+  onFilterChange
 }) {
   // State
-  const [selectedFilter, setSelectedFilter] = useState('All Items')
+  const [internalFilter, setInternalFilter] = useState('All Items')
+  const selectedFilter = activeFilter !== undefined ? activeFilter : internalFilter
+  const setSelectedFilter = (filter) => {
+    if (onFilterChange) onFilterChange(filter)
+    setInternalFilter(filter)
+  }
   const [searchQuery, setSearchQuery] = useState('')
   const [activeModalItem, setActiveModalItem] = useState(null)
 
