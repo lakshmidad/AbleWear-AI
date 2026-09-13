@@ -119,34 +119,40 @@ export default function AdaptiveCatalog() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-      {/* Banner */}
-      <div className={`p-6 sm:p-8 rounded-3xl mb-8 border transition-all ${
+    <div className="w-full max-w-[1200px] mx-auto py-2 px-0 sm:px-2">
+      {/* Header Card */}
+      <div className={`p-6 sm:p-7 rounded-2xl mb-8 border transition-all ${
         highContrast 
-          ? 'bg-zinc-900 border-yellow-400 text-white' 
-          : 'bg-gradient-to-r from-indigo-950 via-slate-900 to-sky-950 text-white shadow-xl'
+          ? 'bg-zinc-950 border-yellow-400 text-white' 
+          : 'bg-white border-slate-200 text-slate-900 shadow-sm'
       }`}>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">
-                Step 3 of 4: Matched Garment Catalog
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ${
+                highContrast ? 'bg-yellow-400 text-black' : 'bg-indigo-100 text-indigo-800 border border-indigo-200'
+              }`}>
+                Step 3 of 4
               </span>
-              <span className="text-xs text-indigo-200/80">3D Seated vs. Standing Biomechanics</span>
+              <span className={`text-xs ${highContrast ? 'text-zinc-400' : 'text-slate-500'}`}>
+                3D Seated vs. Standing Fit Simulator
+              </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black font-heading tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black font-heading tracking-tight">
               Personalized Matched Catalog & Fit Simulator
             </h1>
-            <p className="mt-2 text-sm sm:text-base text-indigo-100 max-w-2xl leading-relaxed">
+            <p className={`mt-1.5 text-sm max-w-2xl leading-relaxed ${
+              highContrast ? 'text-zinc-300' : 'text-slate-600'
+            }`}>
               Items dynamically filtered and ranked by your Step 2 Accessibility Match Score. Toggle the interactive Seated vs. Standing Fit Simulator on any card to evaluate back length coverage, zero lap-bunching, and seam stretch.
             </p>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <span className={`text-xs px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 ${
-              highContrast ? 'bg-zinc-800 text-yellow-300 border border-yellow-400' : 'bg-white/10 text-white border border-white/20'
+            <span className={`text-xs px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 border ${
+              highContrast ? 'bg-zinc-900 text-yellow-300 border-yellow-400' : 'bg-slate-50 text-slate-700 border-slate-200'
             }`}>
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <ShieldCheck className="w-4 h-4 text-emerald-500" />
               Profile: {userProfile.mobility.split('/')[0]}
             </span>
           </div>
