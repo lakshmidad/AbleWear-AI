@@ -8,6 +8,7 @@ import GarmentScanner from './components/GarmentScanner'
 import AdaptiveCatalog from './components/AdaptiveCatalog'
 import CustomizationPortal from './components/CustomizationPortal'
 import MyOrdersPage from './components/MyOrdersPage'
+import WizardStepper from './components/WizardStepper'
 import OrderTrackingModal from './components/OrderTrackingModal'
 import VoiceAssistantOverlay from './components/VoiceAssistantOverlay'
 import Footer from './components/Footer'
@@ -34,11 +35,20 @@ function MainContent() {
       highContrast ? 'bg-black text-white' : 'bg-slate-50 text-slate-900'
     } ${fontSizeClass}`}>
       
-      {/* Persistent Accessible Navbar & Global Controls */}
+      {/* Single Unified Accessible Navbar */}
       <Navbar />
 
-      {/* Main Content Area with Page Transitions */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-4" id="main-content" tabIndex={-1}>
+      {/* Main Content Area with Page Transitions (Max 1200px Clean Layout) */}
+      <main className="flex-1 max-w-[1200px] mx-auto w-full px-4 sm:px-6 py-4" id="main-content" tabIndex={-1}>
+        {/* Single clean modern progress bar at the top of the Guided Wizard page */}
+        {currentStep >= 1 && currentStep <= 4 && (
+          <WizardStepper 
+            currentStep={currentStep} 
+            setCurrentStep={setCurrentStep} 
+            highContrast={highContrast} 
+          />
+        )}
+
         <AnimatePresence mode="wait">
           {/* Step 0: Creative Adaptive Fashion Landing Page */}
           {currentStep === 0 && (
