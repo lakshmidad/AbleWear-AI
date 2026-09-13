@@ -339,9 +339,20 @@ export function AccessibilityProvider({ children }) {
     setScanProgress(0)
     setScanCompleted(false)
 
-    const matchedSample = SAMPLE_GARMENTS.find(s => s.id === garmentOrFile?.id) || SAMPLE_GARMENTS[0]
-    setScannedGarment(matchedSample)
+    // Check if it's one of our sample garments or a custom uploaded garment
+    const isSample = SAMPLE_GARMENTS.some(s => s.id === garmentOrFile?.id)
+    const targetGarment = isSample 
+      ? (SAMPLE_GARMENTS.find(s => s.id === garmentOrFile?.id) || SAMPLE_GARMENTS[0])
+      : (garmentOrFile || SAMPLE_GARMENTS[0])
+
+    setScannedGarment(targetGarment)
     setDetectionTags([])
+
+    const tagsToSet = targetGarment.detectionTags || [
+      { id: 'ct1', label: 'Magnetic Closure Zone Detected', x: 50, y: 45, confidence: 0.98, type: 'dexterity' },
+      { id: 'ct2', label: 'Tagless Neck', x: 50, y: 15, confidence: 0.96, type: 'sensory' },
+      { id: 'ct3', label: 'Side Seam Zipper', x: 75, y: 55, confidence: 0.94, type: 'dexterity' }
+    ]
 
     let progress = 0
     const interval = setInterval(() => {
@@ -351,9 +362,9 @@ export function AccessibilityProvider({ children }) {
         clearInterval(interval)
         setIsScanning(false)
         setScanCompleted(true)
-        setDetectionTags(matchedSample.detectionTags)
+        setDetectionTags(tagsToSet)
       }
-    }, 280)
+    }, 220)
   }
 
   const toggleAlteration = (altId) => {

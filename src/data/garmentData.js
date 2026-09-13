@@ -10,10 +10,10 @@ export const SAMPLE_GARMENTS = [
     description: 'Crisp woven cotton oxford shirt retrofitted with concealed magnetic button-placket for 1-second single-handed dressing.',
     features: ['Magnetic Snaps', 'Tagless Inner Collar', 'Flat-Felled Soft Seams', 'Easy-Dress Sleeves'],
     detectionTags: [
-      { id: 'dt1', label: 'Concealed Magnetic Snaps', x: 50, y: 45, confidence: 0.98, type: 'dexterity' },
-      { id: 'dt2', label: 'Tagless Smooth Collar', x: 50, y: 15, confidence: 0.96, type: 'sensory' },
-      { id: 'dt3', label: 'Flat Low-Friction Seams', x: 28, y: 60, confidence: 0.94, type: 'sensory' },
-      { id: 'dt4', label: 'Wide Underarm Gusset', x: 74, y: 40, confidence: 0.91, type: 'mobility' }
+      { id: 'dt1', label: 'Magnetic Closure Zone Detected', x: 50, y: 45, confidence: 0.98, type: 'dexterity' },
+      { id: 'dt2', label: 'Tagless Neck', x: 50, y: 15, confidence: 0.96, type: 'sensory' },
+      { id: 'dt3', label: 'Side Seam Zipper', x: 75, y: 55, confidence: 0.94, type: 'dexterity' },
+      { id: 'dt4', label: 'Flat Low-Friction Seams', x: 28, y: 60, confidence: 0.92, type: 'sensory' }
     ],
     fitDetails: {
       seatedScore: 94,
