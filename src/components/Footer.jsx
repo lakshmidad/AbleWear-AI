@@ -34,7 +34,7 @@ export default function Footer() {
 
             {/* Exact required text specification */}
             <p className="text-sm font-semibold mt-1">
-              Track 5: Fashion for People | Developed by Team KalVibers:
+              Track 5: Fashion for People | Developed by Team KalVibers
             </p>
             <div className="flex flex-wrap gap-2 mt-2">
               {teamMembers.map((member, idx) => (

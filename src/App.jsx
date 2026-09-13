@@ -2,15 +2,17 @@ import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AccessibilityProvider, useAccessibility } from './context/AccessibilityContext'
 import Navbar from './components/Navbar'
+import LandingPage from './components/LandingPage'
 import ProfileBuilder from './components/ProfileBuilder'
 import GarmentScanner from './components/GarmentScanner'
 import AdaptiveCatalog from './components/AdaptiveCatalog'
 import CustomizationPortal from './components/CustomizationPortal'
+import OrderTrackingModal from './components/OrderTrackingModal'
 import VoiceAssistantOverlay from './components/VoiceAssistantOverlay'
 import Footer from './components/Footer'
 
 function MainContent() {
-  const { currentStep, highContrast, fontSize } = useAccessibility()
+  const { currentStep, highContrast, fontSize, setIsTrackingOpen } = useAccessibility()
 
   // Font Size class mapping
   const fontSizeClass = fontSize === 'xlarge' 
@@ -19,11 +21,11 @@ function MainContent() {
       ? 'text-lg' 
       : 'text-base'
 
-  // Framer Motion Animation Variants for smooth step-to-step transitions
+  // Framer Motion Animation Variants for smooth transitions
   const stepVariants = {
-    initial: { opacity: 0, y: 15, scale: 0.99 },
-    animate: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.35, ease: 'easeOut' } },
-    exit: { opacity: 0, y: -15, scale: 0.99, transition: { duration: 0.25, ease: 'easeIn' } }
+    initial: { opacity: 0, y: 12, scale: 0.99 },
+    animate: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.3, ease: 'easeOut' } },
+    exit: { opacity: 0, y: -12, scale: 0.99, transition: { duration: 0.2, ease: 'easeIn' } }
   }
 
   return (
@@ -34,9 +36,23 @@ function MainContent() {
       {/* Persistent Accessible Navbar & Global Controls */}
       <Navbar />
 
-      {/* Main Wizard Flow with Framer Motion Page Transitions */}
+      {/* Main Content Area with Page Transitions */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-4" id="main-content" tabIndex={-1}>
         <AnimatePresence mode="wait">
+          {/* Step 0: Creative Adaptive Fashion Landing Page */}
+          {currentStep === 0 && (
+            <motion.div
+              key="landing"
+              variants={stepVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+            >
+              <LandingPage onTrackOrders={() => setIsTrackingOpen(true)} />
+            </motion.div>
+          )}
+
+          {/* Step 1: Accessibility Profile Builder */}
           {currentStep === 1 && (
             <motion.div
               key="step-1"
@@ -49,6 +65,7 @@ function MainContent() {
             </motion.div>
           )}
 
+          {/* Step 2: Automated AI Garment Scanner */}
           {currentStep === 2 && (
             <motion.div
               key="step-2"
@@ -61,6 +78,7 @@ function MainContent() {
             </motion.div>
           )}
 
+          {/* Step 3: Personalized Accessible Catalog & Fit Simulator */}
           {currentStep === 3 && (
             <motion.div
               key="step-3"
@@ -73,6 +91,7 @@ function MainContent() {
             </motion.div>
           )}
 
+          {/* Step 4: Customization Portal & Local Tailor Dispatch */}
           {currentStep === 4 && (
             <motion.div
               key="step-4"
@@ -89,6 +108,9 @@ function MainContent() {
 
       {/* Floating Hands-Free Voice Assistant HUD */}
       <VoiceAssistantOverlay />
+
+      {/* Order Tracking Modal Dialog */}
+      <OrderTrackingModal />
 
       {/* Persistent Team Footer */}
       <Footer />
