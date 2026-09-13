@@ -47,6 +47,7 @@ export default function CustomizationPortal() {
     calculateOrderSummary,
     highContrast,
     setCurrentStep,
+    setIsTrackingOpen,
     speak 
   } = useAccessibility()
 
@@ -398,17 +399,17 @@ export default function CustomizationPortal() {
               </div>
             </div>
 
-            {/* Primary Action Button */}
+            {/* Primary Action Button: 'Confirm & Place Customization Order' */}
             <button
               onClick={handleSubmitCustomization}
-              id="submit-customization-btn"
+              id="confirm-place-order-btn"
               className={`w-full mt-6 py-4 px-6 rounded-2xl font-black text-sm sm:text-base flex items-center justify-center gap-3 transition-all min-h-[52px] shadow-xl focus:ring-4 focus:ring-emerald-400 ${
                 highContrast
                   ? 'bg-yellow-400 text-black hover:bg-yellow-300 ring-4 ring-yellow-400/40'
                   : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white'
               }`}
             >
-              <span>Submit Customization Request</span>
+              <span>Confirm & Place Customization Order</span>
               <Send className="w-5 h-5" />
             </button>
           </div>
@@ -627,12 +628,16 @@ export default function CustomizationPortal() {
               {/* Modal Buttons */}
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
-                  onClick={() => setShowOrderModal(false)}
-                  className={`flex-1 py-3 px-4 rounded-xl font-bold text-xs sm:text-sm min-h-[48px] ${
-                    highContrast ? 'bg-zinc-800 text-white hover:bg-zinc-700' : 'bg-slate-200 text-slate-800 hover:bg-slate-300'
+                  onClick={() => {
+                    setShowOrderModal(false)
+                    setCurrentStep(5)
+                  }}
+                  className={`flex-1 py-3 px-4 rounded-xl font-bold text-xs sm:text-sm min-h-[48px] flex items-center justify-center gap-2 ${
+                    highContrast ? 'bg-zinc-800 text-yellow-300 hover:bg-zinc-700' : 'bg-slate-200 text-slate-800 hover:bg-slate-300'
                   }`}
                 >
-                  View Order Details
+                  <PackageCheck className="w-4 h-4 text-emerald-500" />
+                  <span>Go to My Orders & Tracker</span>
                 </button>
                 <button
                   onClick={() => {

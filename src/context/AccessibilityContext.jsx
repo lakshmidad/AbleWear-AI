@@ -4,8 +4,8 @@ import { SAMPLE_GARMENTS, CATALOG_ITEMS, AVAILABLE_ALTERATIONS, LOCAL_TAILORS } 
 const AccessibilityContext = createContext(null)
 
 export function AccessibilityProvider({ children }) {
-  // 1. Wizard Pipeline State: Steps 1, 2, 3, 4
-  const [currentStep, setCurrentStep] = useState(1)
+  // 1. Wizard Pipeline State: Step 0 is Landing Page, Steps 1-4 are Guided Pipeline
+  const [currentStep, setCurrentStep] = useState(0)
 
   // 2. Global Accessibility Settings (WCAG 2.1 AA)
   const [highContrast, setHighContrast] = useState(false)
@@ -35,7 +35,71 @@ export function AccessibilityProvider({ children }) {
   const [selectedAlterations, setSelectedAlterations] = useState(['alt-magnetic-snaps', 'alt-tagless-seams'])
   const [customInstructions, setCustomInstructions] = useState('')
   const [assignedTailor, setAssignedTailor] = useState(LOCAL_TAILORS[0])
-  const [orderStatus, setOrderStatus] = useState(null) // null or { orderId, date, status, trackingStep, totalFee }
+  
+  // Order Tracking State & History
+  const [isTrackingOpen, setIsTrackingOpen] = useState(false)
+  const [orderHistory, setOrderHistory] = useState([
+    {
+      orderId: 'ADAPT-849201',
+      date: 'Sep 13, 2026',
+      status: 'In Alteration',
+      trackingStep: 3,
+      totalFee: 63.00,
+      turnaround: '48-hour delivery',
+      assignedTailor: LOCAL_TAILORS[0],
+      selectedGarment: CATALOG_ITEMS[0],
+      alterations: [AVAILABLE_ALTERATIONS[0], AVAILABLE_ALTERATIONS[2]],
+      notes: 'Concealed magnetic closures on front placket; smooth neckline seam tape.'
+    },
+    {
+      orderId: 'ADAPT-910452',
+      date: 'Sep 12, 2026',
+      status: 'Out for Delivery',
+      trackingStep: 5,
+      totalFee: 70.00,
+      turnaround: 'Express 24-hr',
+      assignedTailor: LOCAL_TAILORS[2] || LOCAL_TAILORS[0],
+      selectedGarment: CATALOG_ITEMS[1] || CATALOG_ITEMS[0],
+      alterations: [AVAILABLE_ALTERATIONS[1], AVAILABLE_ALTERATIONS[3] || AVAILABLE_ALTERATIONS[0]],
+      notes: 'Full length side-seam zippers with ring pulls for seated dressing.'
+    },
+    {
+      orderId: 'ADAPT-638204',
+      date: 'Sep 11, 2026',
+      status: 'Tailor Accepted',
+      trackingStep: 2,
+      totalFee: 42.00,
+      turnaround: '36-hour delivery',
+      assignedTailor: LOCAL_TAILORS[1] || LOCAL_TAILORS[0],
+      selectedGarment: CATALOG_ITEMS[2] || CATALOG_ITEMS[0],
+      alterations: [AVAILABLE_ALTERATIONS[2]],
+      notes: 'Tagless conversion & flat-felled seam binding for hyper-sensitive skin.'
+    },
+    {
+      orderId: 'ADAPT-421908',
+      date: 'Sep 05, 2026',
+      status: 'Delivered',
+      trackingStep: 5,
+      totalFee: 68.00,
+      turnaround: 'Completed & Delivered',
+      assignedTailor: LOCAL_TAILORS[0],
+      selectedGarment: CATALOG_ITEMS[3] || CATALOG_ITEMS[0],
+      alterations: [AVAILABLE_ALTERATIONS[0], AVAILABLE_ALTERATIONS[1]],
+      notes: 'Magnetic snaps installed on cuffs and front closure.'
+    }
+  ])
+  const [orderStatus, setOrderStatus] = useState({
+    orderId: 'ADAPT-849201',
+    date: 'Sep 13, 2026',
+    status: 'In Alteration',
+    trackingStep: 3,
+    totalFee: 63.00,
+    turnaround: '48-hour delivery',
+    assignedTailor: LOCAL_TAILORS[0],
+    selectedGarment: CATALOG_ITEMS[0],
+    alterations: [AVAILABLE_ALTERATIONS[0], AVAILABLE_ALTERATIONS[2]],
+    notes: 'Concealed magnetic closures on front placket; smooth neckline seam tape.'
+  })
 
   // 7. Voice Assistant State (Hands-free control)
   const [isListening, setIsListening] = useState(false)
@@ -77,7 +141,7 @@ export function AccessibilityProvider({ children }) {
     // 2. Dexterity criteria (weight: 35)
     totalWeight += 35
     const hasDexterityMatch = profile.dexterity?.some(d => {
-      if (d === 'Fine Motor Difficulty' || d === 'Reduced Hand Strength' || d === 'Single-Hand Operation Only') {
+      if (d === 'Fine Motor Difficulty' || d === 'Reduced Hand Strength' || d === 'Single-Hand Operation Only' || d === 'Tremors') {
         return garment.features?.some(f => 
           f.toLowerCase().includes('magnetic') || 
           f.toLowerCase().includes('zipper') || 
@@ -119,18 +183,17 @@ export function AccessibilityProvider({ children }) {
     return { score: calculatedScore, breakdown }
   }
 
-  // Active match calculation for currently scanned garment
   const activeMatch = calculateMatchScore(scannedGarment, userProfile)
 
   // Intelligent Pre-Filling of Alterations when User Profile changes
   useEffect(() => {
     const recommendedIds = []
-    if (userProfile.dexterity?.includes('Fine Motor Difficulty') || userProfile.dexterity?.includes('Tremors') || userProfile.dexterity?.includes('Single-Hand Operation Only')) {
+    if (userProfile.dexterity?.includes('Fine Motor Difficulty') || userProfile.dexterity?.includes('Tremors') || userProfile.dexterity?.includes('Single-Hand Operation Only') || userProfile.dexterity?.includes('Reduced Hand Strength')) {
       recommendedIds.push('alt-magnetic-snaps')
     }
     if (userProfile.mobility === 'Wheelchair / Seated Posture') {
       recommendedIds.push('alt-side-zippers')
-      recommendedIds.push('alt-back-rise')
+      recommendedIds.push('alt-elastic-waist')
     }
     if (userProfile.sensory?.includes('Tagless Inner Collar') || userProfile.sensory?.includes('Flat-Felled Soft Seams')) {
       recommendedIds.push('alt-tagless-seams')
@@ -139,7 +202,6 @@ export function AccessibilityProvider({ children }) {
       recommendedIds.push('alt-pull-loops')
     }
 
-    // Deduplicate and fallback
     const unique = [...new Set(recommendedIds)]
     setSelectedAlterations(unique.length > 0 ? unique : ['alt-magnetic-snaps', 'alt-tagless-seams'])
   }, [userProfile])
@@ -168,6 +230,34 @@ export function AccessibilityProvider({ children }) {
     const text = (rawText || '').toLowerCase().trim()
     setLastCommand(rawText)
 
+    // "Start 4-Step Guided Wizard" / "Start wizard"
+    if (text.includes('start wizard') || text.includes('guided wizard') || text.includes('start')) {
+      setCurrentStep(1)
+      const msg = 'Starting 4-Step Guided Wizard with Step 1: Accessibility Profile Builder.'
+      setVoiceFeedback(msg)
+      speak(msg)
+      return
+    }
+
+    // "Track my orders" / "Track orders" / "My orders"
+    if (text.includes('track my orders') || text.includes('track order') || text.includes('tracking') || text.includes('my orders')) {
+      setCurrentStep(5)
+      setIsTrackingOpen(false)
+      const msg = 'Opening Flipkart-Style My Orders and Live Order Tracker.'
+      setVoiceFeedback(msg)
+      speak(msg)
+      return
+    }
+
+    // "Home" / "Landing page"
+    if (text.includes('home') || text.includes('landing') || text.includes('overview')) {
+      setCurrentStep(0)
+      const msg = 'Returning to AdaptiveStyle AI Home Landing Page.'
+      setVoiceFeedback(msg)
+      speak(msg)
+      return
+    }
+
     // "Next step"
     if (text.includes('next step') || text.includes('continue') || text.includes('go forward')) {
       setCurrentStep(prev => Math.min(4, prev + 1))
@@ -179,8 +269,8 @@ export function AccessibilityProvider({ children }) {
 
     // "Previous step" / "Back"
     if (text.includes('previous step') || text.includes('go back') || text.includes('last step')) {
-      setCurrentStep(prev => Math.max(1, prev - 1))
-      const msg = `Returning to Step ${Math.max(1, currentStep - 1)}.`
+      setCurrentStep(prev => Math.max(0, prev - 1))
+      const msg = `Returning to Step ${Math.max(0, currentStep - 1)}.`
       setVoiceFeedback(msg)
       speak(msg)
       return
@@ -215,6 +305,51 @@ export function AccessibilityProvider({ children }) {
       return
     }
 
+    // "Matched Catalog" / "Catalog" / "Browse"
+    if (text.includes('catalog') || text.includes('matched') || text.includes('shop') || text.includes('browse')) {
+      setCurrentStep(3)
+      const msg = 'Opening Personalized Matched Adaptive Catalog and 3D Fit Simulator.'
+      setVoiceFeedback(msg)
+      speak(msg)
+      return
+    }
+
+    // "Profile" / "Accessibility Profile"
+    if (text.includes('profile') || text.includes('mobility needs')) {
+      setCurrentStep(1)
+      const msg = 'Opening Step 1: Accessibility Profile Builder.'
+      setVoiceFeedback(msg)
+      speak(msg)
+      return
+    }
+
+    // "Customization" / "Tailor"
+    if (text.includes('customization') || text.includes('tailor') || text.includes('alteration')) {
+      setCurrentStep(4)
+      const msg = 'Opening Step 4: Customization & Local Tailor Dispatch.'
+      setVoiceFeedback(msg)
+      speak(msg)
+      return
+    }
+
+    // "Larger font" / "Increase font"
+    if (text.includes('larger font') || text.includes('increase font') || text.includes('big font')) {
+      setFontSize('xlarge')
+      const msg = 'Font size scaled to extra large.'
+      setVoiceFeedback(msg)
+      speak(msg)
+      return
+    }
+
+    // "Normal font" / "Reset font"
+    if (text.includes('normal font') || text.includes('default font') || text.includes('reset font')) {
+      setFontSize('normal')
+      const msg = 'Font size restored to standard size.'
+      setVoiceFeedback(msg)
+      speak(msg)
+      return
+    }
+
     // "High contrast"
     if (text.includes('high contrast') || text.includes('contrast mode') || text.includes('dark mode')) {
       setHighContrast(prev => !prev)
@@ -224,26 +359,8 @@ export function AccessibilityProvider({ children }) {
       return
     }
 
-    // "Step 1" / "Profile"
-    if (text.includes('profile') || text.includes('step 1')) {
-      setCurrentStep(1)
-      const msg = 'Opened Step 1: Accessibility Profile Builder.'
-      setVoiceFeedback(msg)
-      speak(msg)
-      return
-    }
-
-    // "Step 3" / "Catalog"
-    if (text.includes('catalog') || text.includes('matched clothing') || text.includes('step 3')) {
-      setCurrentStep(3)
-      const msg = 'Opened Step 3: Personalized Accessible Catalog.'
-      setVoiceFeedback(msg)
-      speak(msg)
-      return
-    }
-
     // Fallback feedback
-    setVoiceFeedback(`Heard: "${rawText}". Try: "Next step", "Scan garment", or "Read accessibility score out loud".`)
+    setVoiceFeedback(`Heard: "${rawText}". Try: "Start wizard", "Track orders", or "Scan garment".`)
   }
 
   // Web Speech Recognition Lifecycle
@@ -289,7 +406,6 @@ export function AccessibilityProvider({ children }) {
     }
   }, [isListening])
 
-  // Toggle Speech Assistant Listening
   const toggleListening = () => {
     if (isListening) {
       setIsListening(false)
@@ -302,7 +418,7 @@ export function AccessibilityProvider({ children }) {
       speak('Voice assistant stopped.')
     } else {
       setIsListening(true)
-      setVoiceFeedback('Listening... Speak "Next step", "Scan garment", or "Read accessibility score out loud".')
+      setVoiceFeedback('Listening... Say "Start wizard", "Track orders", or "Scan garment".')
       speak('Speech assistant active. Listening for commands.')
       if (recognitionRef.current) {
         try {
@@ -314,18 +430,26 @@ export function AccessibilityProvider({ children }) {
     }
   }
 
-  // Trigger Garment Scanning Simulation (laser + tags + score)
   const triggerGarmentScan = (garmentOrFile) => {
     setIsScanning(true)
     setScanProgress(0)
     setScanCompleted(false)
 
-    // Check if it's one of our sample garments
-    const matchedSample = SAMPLE_GARMENTS.find(s => s.id === garmentOrFile?.id) || SAMPLE_GARMENTS[0]
-    setScannedGarment(matchedSample)
+    // Check if it's one of our sample garments or a custom uploaded garment
+    const isSample = SAMPLE_GARMENTS.some(s => s.id === garmentOrFile?.id)
+    const targetGarment = isSample 
+      ? (SAMPLE_GARMENTS.find(s => s.id === garmentOrFile?.id) || SAMPLE_GARMENTS[0])
+      : (garmentOrFile || SAMPLE_GARMENTS[0])
+
+    setScannedGarment(targetGarment)
     setDetectionTags([])
 
-    // Simulated multi-stage CV detection
+    const tagsToSet = targetGarment.detectionTags || [
+      { id: 'ct1', label: 'Magnetic Closure Zone Detected', x: 50, y: 45, confidence: 0.98, type: 'dexterity' },
+      { id: 'ct2', label: 'Tagless Neck', x: 50, y: 15, confidence: 0.96, type: 'sensory' },
+      { id: 'ct3', label: 'Side Seam Zipper', x: 75, y: 55, confidence: 0.94, type: 'dexterity' }
+    ]
+
     let progress = 0
     const interval = setInterval(() => {
       progress += 20
@@ -334,19 +458,17 @@ export function AccessibilityProvider({ children }) {
         clearInterval(interval)
         setIsScanning(false)
         setScanCompleted(true)
-        setDetectionTags(matchedSample.detectionTags)
+        setDetectionTags(tagsToSet)
       }
-    }, 280)
+    }, 220)
   }
 
-  // Toggle Alteration Checkbox in Step 4
   const toggleAlteration = (altId) => {
     setSelectedAlterations(prev => 
       prev.includes(altId) ? prev.filter(id => id !== altId) : [...prev, altId]
     )
   }
 
-  // Calculate Alteration Pricing and Turnaround
   const calculateOrderSummary = () => {
     const selectedAltsList = AVAILABLE_ALTERATIONS.filter(a => selectedAlterations.includes(a.id))
     const alterationsTotal = selectedAltsList.reduce((acc, curr) => acc + curr.price, 0)
@@ -362,15 +484,14 @@ export function AccessibilityProvider({ children }) {
     }
   }
 
-  // Submit Tailor Dispatch Order
   const submitOrder = () => {
     const summary = calculateOrderSummary()
     const orderId = `ADAPT-${Math.floor(100000 + Math.random() * 900000)}`
     const newOrder = {
       orderId,
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      status: 'Request Sent',
-      trackingStep: 1, // 1: Request Sent, 2: Customization Approved, 3: In Sewing, 4: Ready for Delivery
+      status: 'Order Placed',
+      trackingStep: 1,
       totalFee: summary.totalCost,
       turnaround: `${summary.turnaroundHours}-hour delivery`,
       assignedTailor: assignedTailor,
@@ -379,6 +500,7 @@ export function AccessibilityProvider({ children }) {
       notes: customInstructions
     }
     setOrderStatus(newOrder)
+    setOrderHistory(prev => [newOrder, ...prev])
     speak(`Customization request submitted successfully with Order ID ${orderId}. Matched with ${assignedTailor.name}.`)
     return newOrder
   }
@@ -419,6 +541,11 @@ export function AccessibilityProvider({ children }) {
     assignedTailor,
     setAssignedTailor,
     orderStatus,
+    setOrderStatus,
+    orderHistory,
+    setOrderHistory,
+    isTrackingOpen,
+    setIsTrackingOpen,
     submitOrder,
     resetOrder,
     calculateOrderSummary,
